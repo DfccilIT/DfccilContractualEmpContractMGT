@@ -27,24 +27,6 @@ export function AdminSidebar(props: React.ComponentProps<typeof Sidebar>) {
       icon: LayoutDashboard,
       roles: ['superAdmin'],
     },
-    {
-      title: 'Transfer Requests (HR)',
-      url: '/hr-request-recieved',
-      icon: LayoutDashboard,
-      roles: ['HR'],
-    },
-    {
-      title: 'Transfer Requests (RO)',
-      url: '/reporting-request-recieved',
-      icon: Inbox,
-      roles: ['ReportingOfficer'],
-    },
-    {
-      title: 'Transfer Requests (CGM)',
-      url: '/cgm-request-recieved',
-      icon: Inbox,
-      roles: ['CGM',],
-    },
   ];
 
   const navMainItems = data.filter((item) => item.roles.some((role) => Roles.includes(role)));

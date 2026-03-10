@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ChevronLeft, ChevronRight, LogOut, Hotel, Send, ArrowLeftRight, ClipboardList } from 'lucide-react';
+import { ChevronLeft, ChevronRight, LogOut, Hotel, Send, ArrowLeftRight, ClipboardList, CircleUser, NotebookPen } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { NavMain } from '@/components/nav-main';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarMenu, SidebarMenuButton, SidebarRail, SidebarSeparator, useSidebar } from '@/components/ui/sidebar';
@@ -16,27 +16,9 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const canAccessAdminDashboard = true;
   const allNavItems: NavItem[] = [
     {
-      title: 'Raise Request',
+      title: 'Manage Contract',
       url: '/transfer-request',
-      icon: Send,
-      roles: ['user'],
-    },
-    {
-      title: 'Track Request',
-      url: '/track-request',
-      icon: ClipboardList,
-      roles: ['user'],
-    },
-    {
-      title: 'Track Request V2',
-      url: '/track-request-v2',
-      icon: ClipboardList,
-      roles: ['user'],
-    },
-    {
-      title: 'Mutual Request',
-      url: '/mutual-request',
-      icon: ArrowLeftRight,
+      icon: NotebookPen,
       roles: ['user'],
     },
   ];
@@ -60,7 +42,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
-          {canAccessAdminDashboard && (
+          {/* {canAccessAdminDashboard && (
             <SidebarMenuButton
               onClick={() => {
                 navigate('/reporting-request-recieved');
@@ -74,7 +56,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                 <span>Manage Organization</span>
               </div>
             </SidebarMenuButton>
-          )}
+          )} */}
           <Separator />
           <SidebarMenuButton onClick={handleLogout} tooltip="Exit" asChild className={`${menuButtonBaseClass} hidden sm:flex`}>
             <div className="flex items-center gap-2">

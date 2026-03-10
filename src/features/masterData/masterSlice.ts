@@ -2,8 +2,8 @@ import axiosInstance from '@/services/axiosInstance';
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 
 interface Unit {
-  unitid: number;
-  unitName: string;
+  id: number;
+  name: string;
   sectionId: number | null;
   status: string | null;
   ip: string | null;
@@ -106,8 +106,8 @@ interface Department {
 }
 
 interface MasterData {
-  units: Unit[];
-  departments: string[];
+  unit: Unit[];
+  departments: Department[];
   posts: string[];
   grades: string[];
   employees: Employee[];
@@ -122,7 +122,7 @@ interface MasterState {
 
 const initialState: MasterState = {
   data: {
-    units: [],
+    unit: [],
     departments: [],
     posts: [],
     grades: [],
@@ -135,7 +135,7 @@ const initialState: MasterState = {
 
 export const fetchMasterData = createAsyncThunk<MasterData, void, { rejectValue: string }>('masterData', async (_, thunkAPI) => {
   try {
-    const response = await axiosInstance.get('/Util/constant-data');
+    const response = await axiosInstance.get('/ModuleManagement/GetAllMasterData');
     return response.data.data as MasterData;
   } catch (error: any) {
     return thunkAPI.rejectWithValue(error.response?.data || 'Something went wrong');

@@ -1,5 +1,5 @@
 const DFCCIL_UAT = {
-  apiUrl: 'https://uattransferapi.dfccil.com/api',
+  apiUrl: 'https://uatdmsapi.dfccil.com/api',
   orgHierarchy: 'https://uatorganization.dfccil.com/api',
   logoutUrl: 'http://uat.dfccil.com/DfcHome',
   exitUrl: 'http://uatlogin.dfccil.com/applications',

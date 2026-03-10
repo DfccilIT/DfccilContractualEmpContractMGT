@@ -13,10 +13,10 @@ import { fetchApplications } from '@/features/applications/applicationSlice';
 import AppLayout from '@/components/layout/app-layout';
 import Seo from '@/components/common/Seo';
 import { useAppName } from '@/hooks/useAppName';
-import TransferRequest from '@/pages/user/TransferRequest';
 import { useAuth } from 'react-oidc-context';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchMasterData } from '@/features/masterData/masterSlice';
+import ManageContract from '@/pages/user/ManageContract';
 
 const AppRoutes = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -30,7 +30,6 @@ const AppRoutes = () => {
     }
   }, [masterData.employees, isAuthenticated]);
   useGlobalLogout();
-  console.log(masterData, 'masterData');
   useEffect(() => {
     if (applications.length === 0) {
       dispatch(fetchApplications());
@@ -46,7 +45,7 @@ const AppRoutes = () => {
         <Route element={<AppLayout isAdmin={false} />}>
           <Route element={<PrivateRoute allowedRoles={['user']} />}>
             <Route path="/" element={<HomePage />} />
-            <Route path="/transfer-request" element={<TransferRequest />} />
+            <Route path="/transfer-request" element={<ManageContract />} />
           </Route>
         </Route>
 
