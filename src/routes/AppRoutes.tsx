@@ -18,7 +18,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchMasterData } from '@/features/masterData/masterSlice';
 import ManageContract from '@/pages/user/ManageContract';
 import CreateContract from '@/pages/user/CreateContract';
-import EmployeeContractsMapping from '@/pages/user/EmployeeContractsMapping';
 
 const AppRoutes = () => {
   const dispatch = useDispatch<AppDispatch>();
