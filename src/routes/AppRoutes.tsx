@@ -45,16 +45,15 @@ const AppRoutes = () => {
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/logout-notification" element={<FrontChannelLogout />} />
         <Route element={<AppLayout isAdmin={false} />}>
-          <Route element={<PrivateRoute allowedRoles={['user']} />}>
+          <Route element={<PrivateRoute allowedRoles={['SuperAdmin', 'HR']} />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/transfer-request" element={<ManageContract />} />
             <Route path="/manage-contract" element={<CreateContract />} />
             <Route path="/employee-contract-mapping" element={<EmployeeContractsMapping />} />
           </Route>
         </Route>
-
         <Route element={<AppLayout isAdmin={true} />}>
-          <Route element={<PrivateRoute allowedRoles={['superAdmin']} />}>
+          <Route element={<PrivateRoute allowedRoles={['SuperAdmin', 'HR']} />}>
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
           </Route>
         </Route>

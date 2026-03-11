@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router';
+import { Navigate, Outlet, useLocation, useNavigate } from 'react-router';
 import { useAuth } from 'react-oidc-context';
 import Loader from '@/components/ui/loader';
 import { fetchUserProfile } from '@/features/user/userSlice';
@@ -19,11 +19,11 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ allowedRoles = [] }) => {
   const navigate = useNavigate();
   useSessionChecker();
 
-  const { loading: userLoading } = useAppSelector((state) => state.user);
+  const { loading: userLoading, Roles } = useAppSelector((state) => state.user);
   const isAuthenticated = auth.isAuthenticated;
   const isInitializing = auth.isLoading;
   const redirectHandled = useRef(false);
-
+  console.log(Roles, 'Roles');
   useEffect(() => {
     if (!isAuthenticated && !isInitializing && !redirectHandled.current) {
       redirectHandled.current = true;
@@ -52,6 +52,10 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ allowedRoles = [] }) => {
       navigate(returnUrl ?? fallbackUrl, { replace: true });
     }
   }, [isAuthenticated, auth.user, dispatch, navigate, location.pathname, location.search]);
+  const hasRequiredRole = allowedRoles.length === 0 || Roles.some((r) => allowedRoles.includes(r as UserRole));
+  if (userLoading || isInitializing) return <Loader />;
+  // if (isDelegatedUser && !hasDelegationPermission) return <Navigate to="/unauthorized" replace />;
+  if (allowedRoles.length > 0 && !hasRequiredRole && !userLoading) return <Navigate to="/unauthorized" replace />;
 
   if (!isAuthenticated || userLoading) {
     return <Loader />;

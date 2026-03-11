@@ -1,5 +1,18 @@
 import * as React from 'react';
-import { ChevronLeft, ChevronRight, LogOut, Hotel, Send, ArrowLeftRight, ClipboardList, CircleUser, NotebookPen, SquarePen, SquareUserRound, User2 } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  LogOut,
+  Hotel,
+  Send,
+  ArrowLeftRight,
+  ClipboardList,
+  CircleUser,
+  NotebookPen,
+  SquarePen,
+  SquareUserRound,
+  User2,
+} from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { NavMain } from '@/components/nav-main';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarMenu, SidebarMenuButton, SidebarRail, SidebarSeparator, useSidebar } from '@/components/ui/sidebar';
@@ -19,19 +32,19 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
       title: 'Manage Contractor',
       url: '/transfer-request',
       icon: SquareUserRound,
-      roles: ['user'],
+      roles: ['SuperAdmin', 'HR'],
     },
     {
       title: 'Manage Contract',
       url: '/manage-contract',
       icon: SquarePen,
-      roles: ['user'],
+      roles: ['SuperAdmin', 'HR'],
     },
     {
       title: 'Employee Mapping',
       url: '/employee-contract-mapping',
       icon: User2,
-      roles: ['user'],
+      roles: ['SuperAdmin', 'HR'],
     },
   ];
   const navMainItems = allNavItems.filter((item) => item.roles.some((role) => Roles.includes(role)));
