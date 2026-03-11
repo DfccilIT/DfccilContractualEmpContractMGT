@@ -60,7 +60,6 @@ export function ContractModal({ open, onOpenChange, mode = 'add', initialData, o
     setErrors({});
   }, [open, mode, initialData]);
 
-
   const validate = () => {
     const e: FormErrors = {};
 
@@ -88,7 +87,7 @@ export function ContractModal({ open, onOpenChange, mode = 'add', initialData, o
     await onSave?.(payload);
   };
 
-  const toggleDepartment = (dept : string) => {
+  const toggleDepartment = (dept: string) => {
     setForm((prev) => ({
       ...prev,
       departments: prev.departments.includes(dept) ? prev.departments.filter((d) => d !== dept) : [...prev.departments, dept],
@@ -99,7 +98,7 @@ export function ContractModal({ open, onOpenChange, mode = 'add', initialData, o
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()} className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>{mode === 'edit' ? 'Edit Contract' : 'Add Contract'}</DialogTitle>
+          <DialogTitle>{mode === 'edit' ? 'Edit Contractor' : 'Add Contractor'}</DialogTitle>
         </DialogHeader>
 
         <div className="flex gap-3 mt-4">
@@ -138,6 +137,29 @@ export function ContractModal({ open, onOpenChange, mode = 'add', initialData, o
           <p className="text-sm font-medium">Departments</p>
 
           <div className="border rounded-md p-3 space-y-2 max-h-40 overflow-y-auto">
+            {/* Select All */}
+            <label className="flex items-center gap-2 text-sm font-semibold">
+              <input
+                type="checkbox"
+                checked={form.departments.length === departments.length}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setForm({
+                      ...form,
+                      departments: departments.map((d) => String(d.value)),
+                    });
+                  } else {
+                    setForm({
+                      ...form,
+                      departments: [],
+                    });
+                  }
+                }}
+              />
+              Select All
+            </label>
+
+            {/* Departments */}
             {departments.map((d) => (
               <label key={d.value} className="flex items-center gap-2 text-sm">
                 <input type="checkbox" checked={form.departments.includes(String(d.value))} onChange={() => toggleDepartment(String(d.value))} />

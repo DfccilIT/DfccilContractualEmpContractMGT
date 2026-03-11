@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ChevronLeft, ChevronRight, LogOut, Hotel, Send, ArrowLeftRight, ClipboardList, CircleUser, NotebookPen } from 'lucide-react';
+import { ChevronLeft, ChevronRight, LogOut, Hotel, Send, ArrowLeftRight, ClipboardList, CircleUser, NotebookPen, SquarePen, SquareUserRound, User2 } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { NavMain } from '@/components/nav-main';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarMenu, SidebarMenuButton, SidebarRail, SidebarSeparator, useSidebar } from '@/components/ui/sidebar';
@@ -16,9 +16,21 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const canAccessAdminDashboard = true;
   const allNavItems: NavItem[] = [
     {
-      title: 'Manage Contract',
+      title: 'Manage Contractor',
       url: '/transfer-request',
-      icon: NotebookPen,
+      icon: SquareUserRound,
+      roles: ['user'],
+    },
+    {
+      title: 'Manage Contract',
+      url: '/manage-contract',
+      icon: SquarePen,
+      roles: ['user'],
+    },
+    {
+      title: 'Employee Mapping',
+      url: '/employee-contract-mapping',
+      icon: User2,
       roles: ['user'],
     },
   ];

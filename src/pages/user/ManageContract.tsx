@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Edit, Plus, Trash2 } from 'lucide-react';
+import { Edit, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useAppSelector } from '@/app/hooks';
 import { RootState } from '@/app/store';
 import axiosInstance from '@/services/axiosInstance';
@@ -147,24 +147,29 @@ const ManageContract = () => {
       header: 'Action',
       cell: ({ row }) => (
         <div className="flex items-center justify-center gap-2">
-          <button
+          {/* Edit Button */}
+          <Button
+            variant="outline"
+            size="icon"
             onClick={() => {
               setSelectedRow(row.original);
               setMode('edit');
               setShowModal(true);
             }}
-            className="rounded-lg border p-1 text-gray-600 hover:bg-gray-100"
+            className="h-8 w-8 border-gray-200 hover:bg-blue-50 hover:text-blue-600"
+            title="Update"
           >
-            <Edit className="w-4 h-4" />
-          </button>
+            <Pencil className="w-4 h-4" />
+          </Button>
 
+          {/* Delete Button */}
           <ConfirmDialog
-            triggerClassName={'bg-red-500 px-1 h-6'}
+            triggerClassName="h-8 w-8 p-0 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100"
             triggerLabel=""
             onConfirm={() => handleDelete(row.original.contractorId)}
             icon={<Trash2 size={16} />}
-            description="Are you sure you want to delete this contract? This action cannot be undone."
             title="Delete Contract"
+            description="Are you sure you want to delete this contract? This action cannot be undone."
           />
         </div>
       ),
@@ -201,7 +206,7 @@ const ManageContract = () => {
       <div className="max-w-[1600px] mx-auto space-y-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold">Manage Contracts</h1>
+            <h1 className="text-2xl font-bold">Manage Contractors</h1>
             <p className="text-gray-600 mt-1">Add, modify, or deactivate contractor mappings for organizational units and departments.</p>
           </div>
         </div>
@@ -211,7 +216,6 @@ const ManageContract = () => {
               <Button
                 onClick={() => {
                   const userUnit = units.find((u) => u.unitName === userDetails.Unit);
-                  console.log(userUnit.unitid  , " djofhoijhfoi")
                   setMode('add');
                   setSelectedRow({
                     contractor: '',
@@ -228,10 +232,10 @@ const ManageContract = () => {
                 className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               >
                 <Plus className="w-4 h-4" />
-                Add Contract
+                Add Contractor
               </Button>
             </div>
-            <TableList columns={columns} data={filteredContracts} showSearchInput showRefresh />
+            <TableList columns={columns} data={filteredContracts} showSearchInput showRefresh onRefresh={() => fetchContractorsData() } />
           </CardContent>
         </Card>
       </div>

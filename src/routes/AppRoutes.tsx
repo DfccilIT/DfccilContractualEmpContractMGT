@@ -17,6 +17,8 @@ import { useAuth } from 'react-oidc-context';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchMasterData } from '@/features/masterData/masterSlice';
 import ManageContract from '@/pages/user/ManageContract';
+import CreateContract from '@/pages/user/CreateContract';
+import EmployeeContractsMapping from '@/pages/user/EmployeeContractsMapping';
 
 const AppRoutes = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -46,6 +48,8 @@ const AppRoutes = () => {
           <Route element={<PrivateRoute allowedRoles={['user']} />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/transfer-request" element={<ManageContract />} />
+            <Route path="/manage-contract" element={<CreateContract />} />
+            <Route path="/employee-contract-mapping" element={<EmployeeContractsMapping />} />
           </Route>
         </Route>
 

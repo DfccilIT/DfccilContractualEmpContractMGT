@@ -1,6 +1,7 @@
 import { useState, ReactNode } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { AlertTriangle, Trash2 } from 'lucide-react';
 
 interface ConfirmDialogProps {
   triggerLabel: string;
@@ -9,8 +10,9 @@ interface ConfirmDialogProps {
   title?: string;
   description?: string;
   actionLabel?: string;
-  icon?: ReactNode; // optional icon
+  icon?: ReactNode;
   onConfirm: () => void;
+  beforeOpen?: () => boolean;
 }
 
 export default function ConfirmDialog({
@@ -19,11 +21,21 @@ export default function ConfirmDialog({
   disabled = false,
   title = 'Are you sure?',
   description = 'This action cannot be undone.',
-  actionLabel = 'Confirm',
+  actionLabel = 'Delete',
   icon,
   onConfirm,
+  beforeOpen,
 }: ConfirmDialogProps) {
   const [open, setOpen] = useState(false);
+
+  const handleTriggerClick = () => {
+    if (beforeOpen) {
+      const shouldOpen = beforeOpen();
+      if (!shouldOpen) return;
+    }
+
+    setOpen(true);
+  };
 
   const handleConfirm = () => {
     onConfirm();
@@ -32,16 +44,9 @@ export default function ConfirmDialog({
 
   return (
     <>
-      {/* Trigger Button */}
-      <Button
-        disabled={disabled}
-        className={triggerClassName}
-        onClick={(e) => {
-          e.stopPropagation();
-          setOpen(true);
-        }}
-      >
-        {icon && <span className="gap-2 flex items-center">{icon}</span>}
+      {/* Trigger */}
+      <Button disabled={disabled} className={triggerClassName} onClick={handleTriggerClick}>
+        {icon}
         {triggerLabel}
       </Button>
 
@@ -49,25 +54,15 @@ export default function ConfirmDialog({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">{title}</DialogTitle>
+            <DialogTitle>{title}</DialogTitle>
             <DialogDescription>{description}</DialogDescription>
           </DialogHeader>
 
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={(e) => {
-                e.stopPropagation();
+            <Button onClick={handleConfirm}>{actionLabel}</Button>
 
-                setOpen(false);
-              }}
-            >
+            <Button variant="outline" onClick={() => setOpen(false)}>
               Cancel
-            </Button>
-
-            <Button className="flex justify-center items-center" onClick={handleConfirm}>
-              {icon && <span className="gap-2">{icon}</span>}
-              {actionLabel && actionLabel}
             </Button>
           </DialogFooter>
         </DialogContent>
