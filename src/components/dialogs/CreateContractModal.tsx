@@ -1,26 +1,181 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Select from 'react-select';
 import { Label } from '@/components/ui/label';
 import { AlertCircle } from 'lucide-react';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import axiosInstance from '@/services/axiosInstance';
 
-export const CreateContractDialog = ({
-  open,
-  onOpenChange,
-  formData,
-  setFormData,
-  mode = 'add',
-  units,
-  filteredContractors,
-  filteredDepartments,
-  errors,
-  clearError,
-  customSelectStyles,
-  validateForm,
-  handleSubmit,
-}) => {
+export const CreateContractDialog = ({ open, onOpenChange, mode = 'add', units, initialData, Contractors, Departments, onSave }) => {
+  const [formData, setFormData] = useState({
+    unit: null,
+    contractor: null,
+    department: null,
+    contractNo: '',
+    startDate: '',
+    endDate: '',
+    noOfEmployees: null,
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
+
   const isEdit = mode === 'edit';
+  const emptyForm = {
+    unit: null,
+    contractor: null,
+    department: null,
+    contractNo: '',
+    startDate: '',
+    endDate: '',
+    noOfEmployees: '',
+  };
+
+  useEffect(() => {
+    if (!open) return;
+
+    if (initialData) {
+      console.log(initialData);
+      console.log(units);
+      console.log(Contractors);
+
+      const selectedUnit = units?.find((u) => u.label === initialData.unit);
+
+      const selectedContractor = Contractors?.find((c) => c.contractor === initialData.contractor);
+
+      const selectedDepartment = selectedContractor?.mappings?.find((m) => m.unitName === initialData.unit && m.departmentName === initialData.department);
+
+      setFormData({
+        unit: selectedUnit ? { value: selectedUnit.value, label: selectedUnit.label } : null,
+
+        contractor: selectedContractor ? { value: selectedContractor.contractorId, label: selectedContractor.contractor } : null,
+
+        department: selectedDepartment ? { value: selectedDepartment.departmentId, label: selectedDepartment.departmentName } : null,
+
+        contractNo: initialData.contractNumber,
+        startDate: initialData.startDate?.split('T')[0],
+        endDate: initialData.endDate?.split('T')[0],
+        noOfEmployees: initialData.numberOfEmployees,
+      });
+    } else {
+      if (units?.length === 1) {
+        setFormData({
+          ...emptyForm,
+          unit: units[0],
+        });
+      } else {
+        setFormData(emptyForm);
+      }
+    }
+  }, [open, initialData, units, Contractors]);
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.unit) newErrors.unit = 'Unit is required';
+
+    if (!formData.contractor) newErrors.contractor = 'Contractor is required';
+
+    if (!formData.department) newErrors.department = 'Department is required';
+
+    if (!formData.contractNo.trim()) newErrors.contractNo = 'Contract number is required';
+
+    if (!formData.startDate) newErrors.startDate = 'Start date is required';
+
+    if (!formData.endDate) newErrors.endDate = 'End date is required';
+
+    if (!formData.noOfEmployees || formData.noOfEmployees <= 0) newErrors.noOfEmployees = 'Employee count must be greater than 0';
+
+    if (formData.startDate && formData.endDate && new Date(formData.endDate) < new Date(formData.startDate)) {
+      newErrors.endDate = 'End date cannot be before start date';
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const customSelectStyles = {
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isSelected ? '#e1e7eb' : state.isFocused ? '#f0f4f6' : 'white',
+      color: '#111827',
+    }),
+    singleValue: (provided) => ({
+      ...provided,
+      color: '#111827',
+    }),
+    control: (provided, state) => ({
+      ...provided,
+      borderColor: state.isFocused ? '#9ca3af' : '#d1d5db',
+      boxShadow: 'none',
+      '&:hover': {
+        borderColor: '#9ca3af',
+      },
+    }),
+  };
+
+  const clearError = (field: string) => {
+    setErrors((prev) => {
+      if (!prev[field]) return prev;
+
+      const updated = { ...prev };
+      delete updated[field];
+      return updated;
+    });
+  };
+
+  const filteredDepartments = useMemo(() => {
+    if (!formData.contractor || !formData.unit) return [];
+
+    const contractor = Contractors.find((c) => c.contractorId === formData.contractor?.value);
+
+    return (
+      contractor?.mappings
+        ?.filter((m) => Number(m.unitId) === Number(formData.unit.value))
+        ?.map((m) => ({
+          label: m.departmentName,
+          value: m.departmentId,
+        })) || []
+    );
+  }, [formData.contractor, formData.unit, Contractors]);
+
+  const filteredContractors = useMemo(() => {
+    if (!formData.unit) return [];
+
+    return Contractors?.filter((c) => c.mappings?.some((m) => Number(m.unitId) === Number(formData.unit.value)))?.map((c) => ({
+      label: c.contractor,
+      value: c.contractorId,
+    }));
+  }, [Contractors, formData.unit]);
+
+  const fetchMappingId = async () => {
+    try {
+      setLoading(true);
+      const response = await axiosInstance.get(
+        `/ContractManagement/get-unit-contract-Mapping?contractId=${formData.contractor.value}&unitId=${formData.unit.value}&departmentId=${formData.department.value}`
+      );
+      if (response.data.statusCode === 200) {
+        return response.data.data;
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const submit = async () => {
+    if (!validateForm()) return;
+    const mappingId = await fetchMappingId();
+    const payload = {
+      contractUnitMappingId: mappingId,
+      contractNumber: formData.contractNo,
+      startDate: formData.startDate,
+      endDate: formData.endDate,
+      numberOfEmployees: formData.noOfEmployees,
+    };
+    await onSave?.(payload);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -230,7 +385,7 @@ export const CreateContractDialog = ({
             actionLabel="Confirm"
             triggerLabel={isEdit ? 'Update' : 'Create'}
             beforeOpen={() => validateForm()}
-            onConfirm={handleSubmit}
+            onConfirm={submit}
           />
         </div>
       </DialogContent>

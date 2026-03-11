@@ -12,6 +12,9 @@ import Select from 'react-select';
 import { Label } from '@/components/ui/label';
 import { AlertCircle, Pencil, Plus, Trash2 } from 'lucide-react';
 import { CreateContractDialog } from '@/components/dialogs/CreateContractModal';
+import ExpandableTable from '@/components/ui/expand-table';
+import ExpandableTableList from '@/components/ui/expand-table';
+import { EmployeeContractsDialog } from '@/components/dialogs/EmployeeContractsDialog';
 
 const CreateContract = () => {
   const userDetails = useAppSelector((state: RootState) => state.user);
@@ -24,41 +27,10 @@ const CreateContract = () => {
   const [showModal, setShowModal] = useState(false);
   const [mode, setMode] = useState<'add' | 'edit'>('add');
   const [selectedRow, setSelectedRow] = React.useState(null);
-  const [formData, setFormData] = useState({
-    unit: null,
-    contractor: null,
-    department: null,
-    contractNo: '',
-    startDate: '',
-    endDate: '',
-    noOfEmployees: null,
-  });
-
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.unit) newErrors.unit = 'Unit is required';
-
-    if (!formData.contractor) newErrors.contractor = 'Contractor is required';
-
-    if (!formData.department) newErrors.department = 'Department is required';
-
-    if (!formData.contractNo.trim()) newErrors.contractNo = 'Contract number is required';
-
-    if (!formData.startDate) newErrors.startDate = 'Start date is required';
-
-    if (!formData.endDate) newErrors.endDate = 'End date is required';
-
-    if (!formData.noOfEmployees || formData.noOfEmployees <= 0) newErrors.noOfEmployees = 'Employee count must be greater than 0';
-
-    if (formData.startDate && formData.endDate && new Date(formData.endDate) < new Date(formData.startDate)) {
-      newErrors.endDate = 'End date cannot be before start date';
-    }
-
-    setErrors(newErrors);
-
-    return Object.keys(newErrors).length === 0;
-  };
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [selectedContract, setSelectedContract] = useState(null);
+  const [selectedEmployees, setSelectedEmployees] = useState([]);
+  const [employeeOptions, setEmployeeOptions] = useState([]);
 
   const fetchStaticData = async () => {
     try {
@@ -69,7 +41,7 @@ const CreateContract = () => {
       const allUnits = response.data.data.unit;
       const allDepartments = response.data.data.departments;
 
-      const isSuperAdmin = userDetails?.Roles?.includes('Super Admin');
+      const isSuperAdmin = userDetails?.Roles?.includes('SuperAdmin');
 
       if (isSuperAdmin) {
         // show all units
@@ -89,14 +61,8 @@ const CreateContract = () => {
           };
 
           setUnits([formattedUnit]);
-
-          setFormData((prev) => ({
-            ...prev,
-            unit: formattedUnit,
-          }));
         }
       }
-
       setDepartments(allDepartments);
     } catch (error) {
       console.log(error);
@@ -104,19 +70,6 @@ const CreateContract = () => {
       setLoading(false);
     }
   };
-
-  const filteredDepartments = useMemo(() => {
-    const contractor = contractors.find((c) => c.contractorId === formData.contractor?.value);
-
-    return (
-      contractor?.mappings
-        ?.filter((m) => m.unitId === formData.unit?.value)
-        ?.map((m) => ({
-          label: m.departmentName,
-          value: m.departmentId,
-        })) || []
-    );
-  }, [formData.contractor, formData.unit, contractors]);
 
   const fetchContractorsData = async () => {
     try {
@@ -130,47 +83,15 @@ const CreateContract = () => {
     }
   };
 
-  const filteredContractors = useMemo(() => {
-    if (!formData.unit) return [];
-
-    return contractors
-      ?.filter((c) => c.mappings?.some((m) => Number(m.unitId) === Number(formData.unit.value)))
-      ?.map((c) => ({
-        label: c.contractor,
-        value: c.contractorId,
-      }));
-  }, [contractors, formData.unit]);
-
-  const fetchMappingId = async () => {
+  const handleSubmit = async (formData) => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get(
-        `/ContractManagement/get-unit-contract-Mapping?contractId=${formData.contractor.value}&unitId=${formData.unit.value}&departmentId=${formData.department.value}`
-      );
-      if (response.data.statusCode === 200) {
-        return response.data.data;
-      }
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSubmit = async () => {
-    if (!validateForm()) return;
-
-    try {
-      setLoading(true);
-
-      const mappingId = await fetchMappingId();
-
       const payload = {
-        contractUnitMappingId: mappingId,
-        contractNumber: formData.contractNo,
+        contractUnitMappingId: formData.contractUnitMappingId,
+        contractNumber: formData.contractNumber,
         startDate: formData.startDate,
         endDate: formData.endDate,
-        numberOfEmployees: formData.noOfEmployees,
+        numberOfEmployees: formData.numberOfEmployees,
       };
 
       let response;
@@ -211,35 +132,6 @@ const CreateContract = () => {
       setLoading(false);
     }
   };
-  const customSelectStyles = {
-    option: (provided, state) => ({
-      ...provided,
-      backgroundColor: state.isSelected ? '#e1e7eb' : state.isFocused ? '#f0f4f6' : 'white',
-      color: '#111827',
-    }),
-    singleValue: (provided) => ({
-      ...provided,
-      color: '#111827',
-    }),
-    control: (provided, state) => ({
-      ...provided,
-      borderColor: state.isFocused ? '#9ca3af' : '#d1d5db',
-      boxShadow: 'none',
-      '&:hover': {
-        borderColor: '#9ca3af',
-      },
-    }),
-  };
-
-  const clearError = (field: string) => {
-    setErrors((prev) => {
-      if (!prev[field]) return prev;
-
-      const updated = { ...prev };
-      delete updated[field];
-      return updated;
-    });
-  };
 
   const fetchContract = async () => {
     try {
@@ -253,11 +145,54 @@ const CreateContract = () => {
     }
   };
 
+  const fetchEmployees = async () => {
+    try {
+      setLoading(true);
+
+      const res = await axiosInstance.get('/ContractManagement/employees-available');
+
+      const isSuperAdmin = userDetails?.Roles?.includes('SuperAdmin');
+
+      let employees = res.data.data;
+
+      if (!isSuperAdmin) {
+        employees = employees.filter((emp) => emp.location === userDetails.Unit);
+      }
+
+      const formatted = employees.map((emp) => ({
+        value: emp.employeeId,
+        label: emp.userName,
+        empCode: emp.employeeCode,
+        department: emp.deptDFCCIL,
+      }));
+
+      setEmployeeOptions(formatted);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchStaticData();
     fetchContractorsData();
     fetchContract();
+    fetchEmployees();
   }, []);
+
+  const filteredContracts = useMemo(() => {
+    if (!userDetails.unitId) return contracts;
+
+    if (userDetails.Roles.includes('SuperAdmin')) {
+      return contracts;
+    }
+
+    return contracts.filter((c) => c.unit === userDetails.Unit);
+  }, [contracts, userDetails]);
+
+  console.log(contracts);
+  console.log(filteredContracts);
 
   const columns = [
     {
@@ -269,6 +204,16 @@ const CreateContract = () => {
       accessorKey: 'contractNumber',
       header: 'Contract No.',
       cell: ({ row }) => <div className="px-2 py-3 font-semibold">{row.original.contractNumber}</div>,
+    },
+    {
+      accessorKey: 'contractor',
+      header: 'Contractor',
+      cell: ({ row }) => <div className="px-2 py-3 font-semibold">{row.original.contractor}</div>,
+    },
+    {
+      accessorKey: 'numberOfEmployees',
+      header: 'No. of Employees',
+      cell: ({ row }) => <div className="px-2 py-3 font-semibold">{row.original.numberOfEmployees || '-'}</div>,
     },
     {
       accessorKey: 'department',
@@ -302,11 +247,6 @@ const CreateContract = () => {
       ),
     },
     {
-      accessorKey: 'numberOfEmployees',
-      header: 'No. of Employees',
-      cell: ({ row }) => <div className="px-2 py-3 font-semibold">{row.original.numberOfEmployees || '-'}</div>,
-    },
-    {
       accessorKey: 'action',
       header: 'Action',
       cell: ({ row }) => (
@@ -316,36 +256,8 @@ const CreateContract = () => {
             variant="outline"
             size="icon"
             onClick={() => {
-              const rowData = row.original;
-
-              const unitOption = units.find((u) => u.value === rowData.unitId) || null;
-
-              const contractorData = contractors.find((c) => c.contractorId === rowData.contractorId);
-
-              const contractorOption = contractorData ? { value: contractorData.contractorId, label: contractorData.contractor } : null;
-
-              const departmentOption =
-                contractorData?.mappings
-                  ?.filter((m) => m.unitId === rowData.unitId)
-                  ?.map((m) => ({
-                    label: m.departmentName,
-                    value: m.departmentId,
-                  }))
-                  ?.find((d) => d.value === rowData.departmentId) || null;
-
-              setSelectedRow(rowData);
+              setSelectedRow(row.original);
               setMode('edit');
-
-              setFormData({
-                unit: unitOption,
-                contractor: contractorOption,
-                department: departmentOption,
-                contractNo: rowData.contractNumber,
-                startDate: rowData.startDate?.split('T')[0],
-                endDate: rowData.endDate?.split('T')[0],
-                noOfEmployees: rowData.numberOfEmployees,
-              });
-
               setShowModal(true);
             }}
             className="h-8 w-8 border-gray-200 hover:bg-blue-50 hover:text-blue-600"
@@ -367,6 +279,52 @@ const CreateContract = () => {
       ),
     },
   ];
+
+  const handleAssignEmployees = (row) => {
+    setSelectedContract(row);
+    setShowAssignModal(true);
+  };
+
+  const handleAssignEmployeesSubmit = async () => {
+    try {
+      setLoading(true);
+
+      const payload = {
+        contractId: selectedContract?.pkContractId,
+        employeeMasterIds: selectedEmployees.map((emp) => emp.value),
+      };
+
+      const response = await axiosInstance.post('/ContractManagement/contract-employees-sync', payload);
+
+      if (response.data.statusCode === 200) {
+        showCustomToast({
+          title: 'Success',
+          type: 'success',
+          message: response.data.message || 'Employees synced successfully',
+        });
+
+        setShowAssignModal(false);
+        setSelectedEmployees([]);
+        fetchContract();
+      } else {
+        showCustomToast({
+          title: 'Error',
+          type: 'error',
+          message: response.data.message || 'Something went wrong',
+        });
+      }
+    } catch (error) {
+      console.log(error);
+
+      showCustomToast({
+        title: 'Error',
+        type: 'error',
+        message: 'Failed to assign employees',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <div className="p-4 md:p-8">
       {loading && <Loader />}
@@ -381,17 +339,8 @@ const CreateContract = () => {
           <CardContent className="mt-5">
             <Button
               onClick={() => {
-                setFormData({
-                  unit: userDetails.Roles.includes('Super Admin') ? null : units[0] || null,
-                  contractor: null,
-                  department: null,
-                  contractNo: '',
-                  startDate: '',
-                  endDate: '',
-                  noOfEmployees: null,
-                });
-
                 setMode('add');
+                setSelectedRow(null);
                 setShowModal(true);
               }}
               className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
@@ -399,7 +348,53 @@ const CreateContract = () => {
               <Plus className="w-4 h-4" />
               Add Contract
             </Button>
-            <TableList columns={columns} data={contracts} showSearchInput showRefresh onRefresh={() => fetchContract()} />
+            {/* <TableList columns={columns} data={filteredContracts} showSearchInput showRefresh onRefresh={() => fetchContract()} /> */}
+            <ExpandableTableList
+              columns={columns}
+              data={filteredContracts}
+              showSearchInput
+              showRefresh
+              onRefresh={fetchContract}
+              renderExpanded={(row) => (
+                <div className="space-y-4">
+                  {/* TOP ACTION BUTTON */}
+                  <div className="flex justify-start">
+                    <Button className="bg-blue-600 hover:bg-blue-700 text-white" onClick={() => handleAssignEmployees(row)}>
+                      Assign Employees
+                    </Button>
+                  </div>
+
+                  {/* SECOND TABLE */}
+                  <table className="w-full border rounded-md">
+                    <thead className="bg-gray-200">
+                      <tr>
+                        <th className="px-4 py-2 text-left">Employee</th>
+                        <th className="px-4 py-2 text-left">Department</th>
+                        <th className="px-4 py-2 text-left">Joining Date</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {row.employees?.length ? (
+                        row.employees.map((emp, i) => (
+                          <tr key={i}>
+                            <td className="px-4 py-2">{emp.name}</td>
+                            <td className="px-4 py-2">{emp.department}</td>
+                            <td className="px-4 py-2">{emp.joiningDate}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={3} className="text-center py-3 text-gray-500">
+                            No employees assigned
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            />
           </CardContent>
         </Card>
       </div>
@@ -407,16 +402,20 @@ const CreateContract = () => {
         open={showModal}
         onOpenChange={setShowModal}
         mode={mode}
-        formData={formData}
-        setFormData={setFormData}
+        initialData={selectedRow}
         units={units}
-        filteredContractors={filteredContractors}
-        filteredDepartments={filteredDepartments}
-        errors={errors}
-        clearError={clearError}
-        customSelectStyles={customSelectStyles}
-        validateForm={validateForm}
-        handleSubmit={handleSubmit}
+        Contractors={contractors}
+        Departments={departments}
+        onSave={handleSubmit}
+      />
+      <EmployeeContractsDialog
+        open={showAssignModal}
+        onOpenChange={setShowAssignModal}
+        selectedContract={selectedContract}
+        selectedEmployees={selectedEmployees}
+        setSelectedEmployees={setSelectedEmployees}
+        employeeOptions={employeeOptions}
+        handleSubmit={handleAssignEmployeesSubmit}
       />
     </div>
   );

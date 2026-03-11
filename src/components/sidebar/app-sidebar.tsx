@@ -40,12 +40,6 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
       icon: SquarePen,
       roles: ['SuperAdmin', 'HR'],
     },
-    {
-      title: 'Employee Mapping',
-      url: '/employee-contract-mapping',
-      icon: User2,
-      roles: ['SuperAdmin', 'HR'],
-    },
   ];
   const navMainItems = allNavItems.filter((item) => item.roles.some((role) => Roles.includes(role)));
   const handleLogout = () => {
