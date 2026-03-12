@@ -1,4 +1,4 @@
-export type UserRole = 'user' | 'CGM' | 'HR' | 'SuperAdmin' | 'ReportingOfficer' | 'Contract Manager';
+export type UserRole = 'SuperAdmin' | 'Contract Manager';
 
 export interface UserClaims {
   name: string;

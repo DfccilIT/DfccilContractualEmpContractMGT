@@ -82,77 +82,93 @@ export const EmployeeContractsDialog = ({ open, onOpenChange, selectedContract, 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()} className="max-w-3xl">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">Assign Employees</DialogTitle>
-        </DialogHeader>
-
-        {/* Contract Info */}
-        {selectedContract && (
-          <div className="bg-gray-50 p-3 rounded-md text-sm">
-            <p>
-              <span className="font-semibold">Contract No :</span> {selectedContract.contractNumber}
-            </p>
-            <p>
-              <span className="font-semibold">Contractor :</span> {selectedContract.contractor}
-            </p>
-            <p>
-              <span className="font-semibold">Max allowed Employees :</span> {selectedContract.numberOfEmployees}
-            </p>
-          </div>
-        )}
-
-        {/* Employee Select */}
-        <div className="space-y-1 mt-1">
-          <Label className="text-md font-semibold text-gray-700">
-            Employees <span className="text-red-500">*</span>
-          </Label>
-
-          <Select
-            ref={selectRef}
-            isMulti
-            closeMenuOnSelect={false}
-            value={selectedEmployees.filter((e) => e.value !== 'ALL')}
-            onChange={handleEmployeeChange}
-            options={[{ value: 'ALL', label: 'Select All Employees' }, ...employeeOptions]}
-            placeholder="Select Employees"
-            styles={customSelectStyles}
-            formatOptionLabel={(option) => {
-              if (option.value === 'ALL') {
-                return <div className="text-blue-600 font-semibold">Select All Employees</div>;
-              }
-
-              return (
-                <div className="flex flex-col">
-                  <span className="font-medium">{option.label}</span>
-                  <span className="text-xs text-gray-500">
-                    {option.empCode} | {option.department}
-                  </span>
-                </div>
-              );
-            }}
-          />
-
-          {errors.employees && (
-            <p className="text-xs text-red-500 flex items-center gap-1">
-              <AlertCircle className="h-3 w-3" />
-              {errors.employees}
-            </p>
-          )}
+      <DialogContent onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()} className="max-w-2xl p-0 overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-6 py-4">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold tracking-wide">Assign Employees</DialogTitle>
+            <p className="text-sm text-blue-100">Select employees to assign to this contract</p>
+          </DialogHeader>
         </div>
+        <div className="p-4 space-y-3">
+          {/* Contract Info */}
+          {selectedContract && (
+            <div className="border rounded-lg p-4 bg-gray-50 shadow-sm">
+              <h3 className="text-sm font-semibold text-gray-700 mb-3">Contract Details</h3>
 
-        {/* Submit */}
-        <div className="pt-4 flex justify-end">
-          <ConfirmDialog
-            triggerClassName="font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-            description="Are you sure you want to assign these employees?"
-            actionLabel="Confirm"
-            triggerLabel="Assign"
-            beforeOpen={() => validateForm()}
-            onConfirm={handleSubmit}
-          />
+              <div className="grid grid-cols-3 gap-4 text-sm">
+                <div>
+                  <p className="text-gray-500">Contract No</p>
+                  <p className="font-medium text-gray-800">{selectedContract.contractNumber}</p>
+                </div>
+
+                <div>
+                  <p className="text-gray-500">Contractor</p>
+                  <p className="font-medium text-gray-800">{selectedContract.contractor}</p>
+                </div>
+
+                <div>
+                  <p className="text-gray-500">Max Employees</p>
+                  <p className="font-medium text-gray-800">{selectedContract.numberOfEmployees}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Employee Select */}
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold text-gray-700">
+              Employees <span className="text-red-500">*</span>
+            </Label>
+
+            <Select
+              ref={selectRef}
+              isMulti
+              closeMenuOnSelect={false}
+              value={selectedEmployees.filter((e) => e.value !== 'ALL')}
+              onChange={handleEmployeeChange}
+              options={[{ value: 'ALL', label: 'Select All Employees' }, ...employeeOptions]}
+              placeholder="Search and select employees..."
+              styles={customSelectStyles}
+              formatOptionLabel={(option) => {
+                if (option.value === 'ALL') {
+                  return <div className="text-blue-600 font-semibold">Select All Employees</div>;
+                }
+
+                return (
+                  <div className="flex flex-col py-1">
+                    <span className="font-medium text-gray-800">{option.label}</span>
+                    <span className="text-xs text-gray-500">
+                      {option.empCode} • {option.department}
+                    </span>
+                  </div>
+                );
+              }}
+            />
+
+            {errors.employees && (
+              <p className="text-xs text-red-500 flex items-center gap-1 mt-1">
+                <AlertCircle className="h-3 w-3" />
+                {errors.employees}
+              </p>
+            )}
+          </div>
+
+          {/* Footer Actions */}
+          <div className="flex justify-end border-t pt-4">
+            <ConfirmDialog
+              triggerClassName="px-5 py-2 font-medium rounded-md bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"
+              description="Are you sure you want to assign these employees?"
+              actionLabel="Confirm"
+              triggerLabel="Assign Employees"
+              beforeOpen={() => validateForm()}
+              onConfirm={handleSubmit}
+            />
+          </div>
         </div>
       </DialogContent>
+
+      {/* Limit Error Dialog */}
       <Dialog open={limitErrorOpen} onOpenChange={setLimitErrorOpen}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
@@ -165,7 +181,7 @@ export const EmployeeContractsDialog = ({ open, onOpenChange, selectedContract, 
           <p className="text-sm text-gray-600 mt-2">{limitErrorMsg}</p>
 
           <div className="flex justify-end mt-4">
-            <button className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600" onClick={() => setLimitErrorOpen(false)}>
+            <button className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition" onClick={() => setLimitErrorOpen(false)}>
               OK
             </button>
           </div>

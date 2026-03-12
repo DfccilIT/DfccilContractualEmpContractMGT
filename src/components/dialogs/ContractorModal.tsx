@@ -36,14 +36,12 @@ type ContractModalProps = {
   departments?: Option[];
 };
 
-export function ContractModal({ open, onOpenChange, mode = 'add', initialData, onSave, saving = false, units = [], departments = [] }: ContractModalProps) {
+export function ContractorModal({ open, onOpenChange, mode = 'add', initialData, onSave, saving = false, units = [], departments = [] }: ContractModalProps) {
   const empty = {
     contractorName: '',
     unit: '',
     departments: [],
   };
-  console.log(initialData);
-  console.log(units);
   const [form, setForm] = React.useState<ContractForm>(empty);
   const [errors, setErrors] = React.useState<FormErrors>({});
 
@@ -85,7 +83,6 @@ export function ContractModal({ open, onOpenChange, mode = 'add', initialData, o
       unit: form.unit,
       departments: form.departments,
     };
-    console.log(payload);
     await onSave?.(payload);
   };
 

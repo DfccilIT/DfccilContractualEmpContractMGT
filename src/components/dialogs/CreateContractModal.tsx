@@ -6,7 +6,18 @@ import ConfirmDialog from '@/components/common/ConfirmDialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import axiosInstance from '@/services/axiosInstance';
 
-export const CreateContractDialog = ({ open, onOpenChange, mode = 'add', units, initialData, Contractors, Departments, onSave }) => {
+export const CreateContractDialog = ({
+  open,
+  onOpenChange,
+  mode = 'add',
+  units,
+  initialData,
+  Contractors,
+  Departments,
+  employees,
+  onSave,
+  assignedEmployees,
+}) => {
   const [formData, setFormData] = useState({
     unit: null,
     contractor: null,
@@ -18,26 +29,54 @@ export const CreateContractDialog = ({ open, onOpenChange, mode = 'add', units, 
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [availableEmployees, setAvailableEmployees] = useState([]);
+  const [selectedEmployees, setSelectedEmployees] = useState([]);
+  const [limitErrorOpen, setLimitErrorOpen] = useState(false);
+  const [limitErrorMsg, setLimitErrorMsg] = useState('');
+
+  useEffect(() => {
+    if (!open) return;
+
+    if (mode === 'edit' && assignedEmployees?.length) {
+      const formattedAssigned = assignedEmployees.map((emp) => ({
+        value: emp.employeeId,
+        label: emp.userName,
+        empCode: emp.employeeCode,
+        department: emp.deptDFCCIL,
+      }));
+
+      const assignedIds = new Set(formattedAssigned.map((e) => e.value));
+
+      const remainingEmployees = employees.filter((e) => !assignedIds.has(e.value));
+
+      setSelectedEmployees(formattedAssigned);
+      setAvailableEmployees(remainingEmployees);
+    } else {
+      setAvailableEmployees(employees || []);
+      setSelectedEmployees([]);
+    }
+
+    setErrors({});
+  }, [open, employees, assignedEmployees, mode]);
 
   const isEdit = mode === 'edit';
-  const emptyForm = {
-    unit: null,
-    contractor: null,
-    department: null,
-    contractNo: '',
-    startDate: '',
-    endDate: '',
-    noOfEmployees: '',
-  };
+  const emptyForm = useMemo(
+    () => ({
+      unit: null,
+      contractor: null,
+      department: null,
+      contractNo: '',
+      startDate: '',
+      endDate: '',
+      noOfEmployees: '',
+    }),
+    []
+  );
 
   useEffect(() => {
     if (!open) return;
 
     if (initialData) {
-      console.log(initialData);
-      console.log(units);
-      console.log(Departments);
-
       const selectedUnit = units?.find((u) => u.label === initialData.unit);
 
       const selectedContractor = Contractors?.find((c) => c.contractor === initialData.contractor);
@@ -89,6 +128,10 @@ export const CreateContractDialog = ({ open, onOpenChange, mode = 'add', units, 
       newErrors.endDate = 'End date cannot be before start date';
     }
 
+    if (selectedEmployees.length === 0) {
+      newErrors.employees = 'Please select at least one employee';
+    }
+
     setErrors(newErrors);
 
     return Object.keys(newErrors).length === 0;
@@ -125,8 +168,7 @@ export const CreateContractDialog = ({ open, onOpenChange, mode = 'add', units, 
   };
 
   const filteredDepartments = useMemo(() => {
-    if (!formData.contractor || !formData.unit) return [];
-
+    if (!formData.contractor || !formData.unit || !Contractors?.length) return [];
     const contractor = Contractors.find((c) => c.contractorId === formData.contractor?.value);
 
     return (
@@ -140,7 +182,7 @@ export const CreateContractDialog = ({ open, onOpenChange, mode = 'add', units, 
   }, [formData.contractor, formData.unit, Contractors]);
 
   const filteredContractors = useMemo(() => {
-    if (!formData.unit) return [];
+    if (!formData.unit || !Contractors?.length) return [];
 
     return Contractors?.filter((c) => c.mappings?.some((m) => Number(m.unitId) === Number(formData.unit.value)))?.map((c) => ({
       label: c.contractor,
@@ -167,49 +209,91 @@ export const CreateContractDialog = ({ open, onOpenChange, mode = 'add', units, 
   const submit = async () => {
     if (!validateForm()) return;
     const mappingId = await fetchMappingId();
+    if (!mappingId) return;
     const payload = {
       contractUnitMappingId: mappingId,
       contractNumber: formData.contractNo,
       startDate: formData.startDate,
       endDate: formData.endDate,
       numberOfEmployees: formData.noOfEmployees,
+      employeeMasterIds: selectedEmployees.map((e) => e.value),
     };
     await onSave?.(payload);
   };
 
+  const addEmployee = (emp) => {
+    if (!formData.noOfEmployees) {
+      setLimitErrorMsg('Please enter number of employees first');
+      setLimitErrorOpen(true);
+      return;
+    }
+
+    if (selectedEmployees.length >= formData.noOfEmployees) {
+      setLimitErrorMsg(`You can only select ${formData.noOfEmployees} employees`);
+      setLimitErrorOpen(true);
+      return;
+    }
+    setSelectedEmployees((prev) => {
+      if (prev.some((e) => e.value === emp.value)) return prev;
+      return [...prev, emp];
+    });
+
+    setAvailableEmployees((prev) => prev.filter((e) => e.value !== emp.value));
+
+    setErrors((prev) => {
+      const copy = { ...prev };
+      delete copy.employees;
+      return copy;
+    });
+  };
+  const removeEmployee = (emp) => {
+    setSelectedEmployees((prev) => prev.filter((e) => e.value !== emp.value));
+
+    setAvailableEmployees((prev) => {
+      if (prev.some((e) => e.value === emp.value)) return prev;
+      return [...prev, emp];
+    });
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()} className="max-w-4xl">
+      <DialogContent
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
+        className="max-w-6xl w-[95vw] max-h-[90vh] overflow-y-auto flex flex-col"
+      >
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">{isEdit ? 'Update Contract' : 'Add Contract'}</DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-4">
           {/* Unit */}
-          <div className="space-y-2">
-            <Label className="text-sm font-semibold text-gray-700">
-              Unit <span className="text-red-500">*</span>
-            </Label>
+          {units.length > 1 && (
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold text-gray-700">
+                Unit <span className="text-red-500">*</span>
+              </Label>
 
-            <Select
-              value={formData.unit}
-              onChange={(val) => {
-                setFormData((prev) => ({ ...prev, unit: val }));
-                clearError('unit');
-              }}
-              options={units}
-              placeholder="Select Unit"
-              isClearable
-              styles={customSelectStyles}
-            />
+              <Select
+                value={formData.unit}
+                onChange={(val) => {
+                  setFormData((prev) => ({ ...prev, unit: val }));
+                  clearError('unit');
+                }}
+                options={units}
+                placeholder="Select Unit"
+                isClearable
+                styles={customSelectStyles}
+              />
 
-            {errors.unit && (
-              <p className="text-xs text-red-500 flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" />
-                {errors.unit}
-              </p>
-            )}
-          </div>
+              {errors.unit && (
+                <p className="text-xs text-red-500 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {errors.unit}
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Contractor */}
           <div className="space-y-2">
@@ -377,6 +461,85 @@ export const CreateContractDialog = ({ open, onOpenChange, mode = 'add', units, 
             )}
           </div>
         </div>
+        <div className="grid grid-cols-2 gap-6 mt-4">
+          {/* Available Employees */}
+          <div className="border rounded-lg p-4">
+            <h3 className="font-semibold text-gray-700 mb-3">Available Employees ({availableEmployees.length})</h3>
+
+            <div className="max-h-52 overflow-y-auto space-y-2">
+              {availableEmployees.map((emp) => (
+                <div
+                  key={emp.value}
+                  onClick={() => {
+                    // if (!formData.noOfEmployees) return;
+                    addEmployee(emp);
+                  }}
+                  //                 className={`flex justify-between items-center border rounded-md px-3 py-2
+                  // ${!formData.noOfEmployees ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-gray-50'}`}
+                  className="flex justify-between items-center border rounded-md px-3 py-2 cursor-pointer hover:bg-gray-50"
+                >
+                  <div className="flex gap-1">
+                    <p className="text-sm font-medium">{emp.empCode} |</p>
+                    <p className="text-sm font-medium">{emp.label} |</p>
+                    <p className="text-sm font-medium">{emp.department}</p>
+                  </div>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      addEmployee(emp);
+                    }}
+                    // disabled={!formData.noOfEmployees}
+                    // className={`text-xs font-medium ${!formData.noOfEmployees ? 'text-gray-400 cursor-not-allowed' : 'text-blue-600 hover:text-blue-800'}`}
+                    className="text-xs font-medium text-blue-600 hover:text-blue-800"
+                  >
+                    Add
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Selected Employees */}
+          <div>
+            <div className="border rounded-lg p-4">
+              <h3 className="font-semibold text-gray-700 mb-3">Selected Employees ({selectedEmployees.length})</h3>
+
+              <div className="max-h-52 overflow-y-auto space-y-2">
+                {selectedEmployees.length === 0 && <p className="text-sm text-gray-400">No employees selected</p>}
+
+                {selectedEmployees.map((emp) => (
+                  <div
+                    key={emp.value}
+                    onClick={() => removeEmployee(emp)}
+                    className="flex justify-between items-center border rounded-md px-3 py-2 bg-blue-50 cursor-pointer hover:bg-blue-100 transition-colors"
+                  >
+                    <div className="flex gap-2">
+                      <p className="text-sm font-medium">{emp.empCode} |</p>
+                      <p className="text-sm font-medium">{emp.label} |</p>
+                      <p className="text-sm font-medium">{emp.department}</p>
+                    </div>
+
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation(); // prevent double trigger
+                        removeEmployee(emp);
+                      }}
+                      className="text-red-500 text-xs font-medium hover:text-red-700"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {errors.employees && (
+              <p className="text-xs text-red-500 flex items-center gap-1 mt-2">
+                <AlertCircle className="h-3 w-3" />
+                {errors.employees}
+              </p>
+            )}
+          </div>
+        </div>
 
         <div className="pt-6 flex justify-end">
           <ConfirmDialog
@@ -389,6 +552,24 @@ export const CreateContractDialog = ({ open, onOpenChange, mode = 'add', units, 
           />
         </div>
       </DialogContent>
+      <Dialog open={limitErrorOpen} onOpenChange={setLimitErrorOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-red-600 flex items-center gap-2">
+              <AlertCircle className="h-5 w-5" />
+              Selection Limit Exceeded
+            </DialogTitle>
+          </DialogHeader>
+
+          <p className="text-sm text-gray-600 mt-2">{limitErrorMsg}</p>
+
+          <div className="flex justify-end mt-4">
+            <button className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600" onClick={() => setLimitErrorOpen(false)}>
+              OK
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 };

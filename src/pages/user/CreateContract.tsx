@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import { Pencil, Plus } from 'lucide-react';
 import { CreateContractDialog } from '@/components/dialogs/CreateContractModal';
 import ExpandableTableList from '@/components/ui/expand-table';
-import { EmployeeContractsDialog } from '@/components/dialogs/EmployeeContractsDialog';
 
 const CreateContract = () => {
   const userDetails = useAppSelector((state: RootState) => state.user);
@@ -19,9 +18,6 @@ const CreateContract = () => {
   const [showModal, setShowModal] = useState(false);
   const [mode, setMode] = useState<'add' | 'edit'>('add');
   const [selectedRow, setSelectedRow] = React.useState(null);
-  const [showAssignModal, setShowAssignModal] = useState(false);
-  const [selectedContract, setSelectedContract] = useState(null);
-  const [selectedEmployees, setSelectedEmployees] = useState([]);
   const [employeeOptions, setEmployeeOptions] = useState([]);
   const [contractEmployees, setContractEmployees] = useState({});
   const [employeeSearch, setEmployeeSearch] = useState({});
@@ -97,6 +93,7 @@ const CreateContract = () => {
         startDate: formData.startDate,
         endDate: formData.endDate,
         numberOfEmployees: formData.numberOfEmployees,
+        employeeMasterIds:formData.employeeMasterIds,
       };
 
       let response;
@@ -152,6 +149,8 @@ const CreateContract = () => {
       const isSuperAdmin = userDetails?.Roles?.includes('SuperAdmin');
 
       let employees = res.data.data;
+
+      console.log(employees);
 
       if (!isSuperAdmin) {
         employees = employees.filter((emp) => emp.location === userDetails.Unit);
@@ -274,7 +273,13 @@ const CreateContract = () => {
           <Button
             variant="outline"
             size="icon"
-            onClick={() => {
+            onClick={async () => {
+              const contractId = row.original.pkContractId;
+
+              if (!contractEmployees[contractId]) {
+                await fetchContractEmployees(contractId);
+              }
+
               setSelectedRow(row.original);
               setMode('edit');
               setShowModal(true);
@@ -299,46 +304,11 @@ const CreateContract = () => {
     },
   ];
 
-  const handleAssignEmployees = (row) => {
-    setSelectedContract(row);
-    setShowAssignModal(true);
-  };
+  const assignedEmployees = useMemo(() => {
+    if (!selectedRow) return [];
+    return contractEmployees[selectedRow.pkContractId] || [];
+  }, [selectedRow, contractEmployees]);
 
-  const handleAssignEmployeesSubmit = async () => {
-    try {
-      setLoading(true);
-
-      const payload = {
-        contractId: selectedContract?.pkContractId,
-        employeeMasterIds: selectedEmployees.map((emp) => emp.value),
-      };
-
-      const response = await axiosInstance.post('/ContractManagement/contract-employees-sync', payload);
-
-      if (response.data.statusCode === 200) {
-        showCustomToast({
-          title: 'Success',
-          type: 'success',
-          message: response.data.message || 'Employees synced successfully',
-        });
-
-        setShowAssignModal(false);
-        setSelectedEmployees([]);
-        fetchContract();
-        fetchContractEmployees(selectedContract?.pkContractId);
-        fetchEmployees();
-      }
-    } catch (error) {
-      console.log(error);
-      showCustomToast({
-        title: 'Error',
-        type: 'error',
-        message: error?.response?.data?.message || 'Something went wrong',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
   return (
     <div className="p-4 md:p-8">
       {loading && <Loader />}
@@ -388,23 +358,24 @@ const CreateContract = () => {
                 const contractId = row.pkContractId;
                 const searchText = employeeSearch[contractId] || '';
 
-                if (!contractEmployees[contractId]) {
-                  fetchContractEmployees(contractId);
-                }
+                useEffect(() => {
+                  if (!contractEmployees[contractId]) {
+                    fetchContractEmployees(contractId);
+                  }
+                }, [contractId]);
 
                 const employees = contractEmployees[contractId] || [];
 
-                const filteredEmployees = employees.filter((emp) =>
-                  `${emp.employeeCode} ${emp.userName} ${emp.mobile}`.toLowerCase().includes(searchText.toLowerCase())
-                );
+                const filteredEmployees = useMemo(() => {
+                  return employees.filter((emp) => `${emp.employeeCode} ${emp.userName} ${emp.mobile}`.toLowerCase().includes(searchText.toLowerCase()));
+                }, [employees, searchText]);
 
                 return (
                   <div className="w-full">
                     <div className="flex justify-between mb-3">
-                      <Button className="bg-blue-600 hover:bg-blue-700 text-white" onClick={() => handleAssignEmployees(row)}>
+                      {/* <Button className="bg-blue-600 hover:bg-blue-700 text-white" onClick={() => handleAssignEmployees(row)}>
                         Assign Employees
-                      </Button>
-
+                      </Button> */}
                       <input
                         placeholder="Search employee..."
                         value={searchText}
@@ -464,16 +435,9 @@ const CreateContract = () => {
         units={unitOptions}
         Contractors={contractors}
         Departments={departmentOptions}
+        employees={employeeOptions}
+        assignedEmployees={assignedEmployees}
         onSave={handleSubmit}
-      />
-      <EmployeeContractsDialog
-        open={showAssignModal}
-        onOpenChange={setShowAssignModal}
-        selectedContract={selectedContract}
-        selectedEmployees={selectedEmployees}
-        setSelectedEmployees={setSelectedEmployees}
-        employeeOptions={employeeOptions}
-        handleSubmit={handleAssignEmployeesSubmit}
       />
     </div>
   );

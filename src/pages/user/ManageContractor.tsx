@@ -9,9 +9,9 @@ import ConfirmDialog from '@/components/common/ConfirmDialog';
 import Loader from '@/components/ui/loader';
 import TableList from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
-import { ContractModal } from '@/components/dialogs/ContractModal';
+import { ContractorModal } from '@/components/dialogs/ContractorModal';
 
-const ManageContract = () => {
+const ManageContractor = () => {
   const [contracts, setContracts] = useState([]);
   const userDetails = useAppSelector((state: RootState) => state.user);
   const [showModal, setShowModal] = useState(false);
@@ -88,9 +88,6 @@ const ManageContract = () => {
   const handleSaveContract = async (formData) => {
     try {
       setLoading(true);
-
-      console.log(formData);
-
       const payload = {
         contractor: formData.contractorName,
         mappings: formData.departments.map((deptId) => ({
@@ -98,10 +95,7 @@ const ManageContract = () => {
           fkDepartmentId: Number(deptId),
         })),
       };
-      console.log(payload);
-
       let response;
-
       if (mode === 'edit') {
         response = await axiosInstance.put(`/ContractManagement/update-contractor/${selectedRow.contractorId}`, payload);
       } else {
@@ -278,7 +272,7 @@ const ManageContract = () => {
           </CardContent>
         </Card>
       </div>
-      <ContractModal
+      <ContractorModal
         open={showModal}
         onOpenChange={setShowModal}
         mode={mode}
@@ -291,4 +285,4 @@ const ManageContract = () => {
   );
 };
 
-export default ManageContract;
+export default ManageContractor;

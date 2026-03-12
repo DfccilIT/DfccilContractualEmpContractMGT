@@ -55,7 +55,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ allowedRoles = [] }) => {
   const hasRequiredRole = allowedRoles.length === 0 || Roles.some((r) => allowedRoles.includes(r as UserRole));
   if (userLoading || isInitializing) return <Loader />;
   // if (isDelegatedUser && !hasDelegationPermission) return <Navigate to="/unauthorized" replace />;
-  if (allowedRoles.length < 0 && !hasRequiredRole && !userLoading) return <Navigate to="/unauthorized" replace />;
+  if (allowedRoles.length > 0 && Roles?.length > 0 && !hasRequiredRole) return <Navigate to="/unauthorized" replace />;
 
   if (!isAuthenticated || userLoading) {
     return <Loader />;

@@ -16,9 +16,9 @@ import { useAppName } from '@/hooks/useAppName';
 import { useAuth } from 'react-oidc-context';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchMasterData } from '@/features/masterData/masterSlice';
-import ManageContract from '@/pages/user/ManageContract';
 import CreateContract from '@/pages/user/CreateContract';
 import ContractHistory from '@/pages/user/ContractHistory';
+import ManageContractor from '@/pages/user/ManageContractor';
 
 const AppRoutes = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -47,7 +47,7 @@ const AppRoutes = () => {
         <Route element={<AppLayout isAdmin={false} />}>
           <Route element={<PrivateRoute allowedRoles={['SuperAdmin', 'Contract Manager']} />}>
             <Route path="/" element={<HomePage />} />
-            <Route path="/transfer-request" element={<ManageContract />} />
+            <Route path="/transfer-request" element={<ManageContractor />} />
             <Route path="/manage-contract" element={<CreateContract />} />
             <Route path="/archive-contract" element={<ContractHistory />} />
           </Route>
