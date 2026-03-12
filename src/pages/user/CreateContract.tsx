@@ -25,6 +25,7 @@ const CreateContract = () => {
   const [employeeOptions, setEmployeeOptions] = useState([]);
   const [contractEmployees, setContractEmployees] = useState({});
   const [employeeSearch, setEmployeeSearch] = useState({});
+  const [selectedUnit, setSelectedUnit] = useState('');
 
   const allowedRoles = ['SuperAdmin', 'Contract Manager'];
   const isSuperAdmin = userDetails?.Roles?.includes('SuperAdmin');
@@ -178,14 +179,20 @@ const CreateContract = () => {
   }, []);
 
   const filteredContracts = useMemo(() => {
-    if (!userDetails.unitId) return contracts;
+    let data = contracts;
 
-    if (userDetails.Roles.includes('SuperAdmin')) {
-      return contracts;
+    if (!userDetails.unitId) return data;
+
+    if (!userDetails.Roles.includes('SuperAdmin')) {
+      data = data.filter((c) => c.unit === userDetails.Unit);
     }
 
-    return contracts.filter((c) => c.unit === userDetails.Unit);
-  }, [contracts, userDetails]);
+    if (selectedUnit) {
+      data = data.filter((c) => c.unit === selectedUnit);
+    }
+
+    return data;
+  }, [contracts, userDetails, selectedUnit]);
 
   const fetchContractEmployees = async (contractId) => {
     try {
@@ -318,7 +325,7 @@ const CreateContract = () => {
         setShowAssignModal(false);
         setSelectedEmployees([]);
         fetchContract();
-        fetchContractEmployees(selectedContract?.pkContractId)
+        fetchContractEmployees(selectedContract?.pkContractId);
         fetchEmployees();
       }
     } catch (error) {
@@ -361,6 +368,22 @@ const CreateContract = () => {
               showSearchInput
               showRefresh
               onRefresh={fetchContract}
+              rightElements={
+                <>
+                  {unitOptions.length > 1 && (
+                    <div className="mb-4 mt-5 w-64">
+                      <select value={selectedUnit} onChange={(e) => setSelectedUnit(e.target.value)} className="w-full border rounded-md p-2">
+                        <option value="">All Units</option>
+                        {unitOptions.map((u) => (
+                          <option key={u.value} value={u.label}>
+                            {u.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </>
+              }
               renderExpanded={(row) => {
                 const contractId = row.pkContractId;
                 const searchText = employeeSearch[contractId] || '';

@@ -18,6 +18,7 @@ const ManageContract = () => {
   const [mode, setMode] = useState<'add' | 'edit'>('add');
   const [selectedRow, setSelectedRow] = React.useState(null);
   const [loading, setLoading] = useState(false);
+  const [selectedUnit, setSelectedUnit] = useState('');
 
   const allowedRoles = ['SuperAdmin', 'Contract Manager'];
   const isSuperAdmin = userDetails?.Roles?.includes('SuperAdmin');
@@ -121,7 +122,7 @@ const ManageContract = () => {
     } catch (error) {
       showCustomToast({
         title: 'Error',
-        message: error?.response?.data?.message || "Something went wrong",
+        message: error?.response?.data?.message || 'Something went wrong',
         type: 'error',
       });
     } finally {
@@ -206,7 +207,7 @@ const ManageContract = () => {
     } catch (error) {
       showCustomToast({
         title: 'Error',
-        message: error?.response?.data?.message || "Something went wrong",
+        message: error?.response?.data?.message || 'Something went wrong',
         type: 'error',
       });
     } finally {
@@ -251,7 +252,29 @@ const ManageContract = () => {
                 Add Contractor
               </Button>
             </div>
-            <TableList columns={columns} data={filteredContractors} showSearchInput showRefresh onRefresh={() => fetchContractorsData()} />
+            <TableList
+              columns={columns}
+              data={filteredContractors}
+              showSearchInput
+              showRefresh
+              onRefresh={() => fetchContractorsData()}
+              // rightElements={
+              //   <>
+              //     {unitOptions.length > 1 && (
+              //       <div className="mb-4 mt-5 w-64">
+              //         <select value={selectedUnit} onChange={(e) => setSelectedUnit(e.target.value)} className="w-full border rounded-md p-2">
+              //           <option value="">All Units</option>
+              //           {unitOptions.map((u) => (
+              //             <option key={u.value} value={u.label}>
+              //               {u.label}
+              //             </option>
+              //           ))}
+              //         </select>
+              //       </div>
+              //     )}
+              //   </>
+              // }
+            />
           </CardContent>
         </Card>
       </div>
