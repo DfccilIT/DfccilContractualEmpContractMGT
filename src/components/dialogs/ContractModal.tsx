@@ -43,6 +43,7 @@ export function ContractModal({ open, onOpenChange, mode = 'add', initialData, o
     departments: [],
   };
   console.log(initialData);
+  console.log(units);
   const [form, setForm] = React.useState<ContractForm>(empty);
   const [errors, setErrors] = React.useState<FormErrors>({});
 
@@ -52,7 +53,7 @@ export function ContractModal({ open, onOpenChange, mode = 'add', initialData, o
       setForm({
         contractorName: initialData.contractor || '',
         unit: String(initialData.mappings?.[0]?.unitId || ''),
-        departments: initialData.mappings?.map((m) => String(m.departmentId)) || [],
+        departments: initialData.mappings?.filter((m) => m.departmentId)?.map((m) => String(m.departmentId)) || [],
       });
     } else {
       setForm(empty);
@@ -84,14 +85,19 @@ export function ContractModal({ open, onOpenChange, mode = 'add', initialData, o
       unit: form.unit,
       departments: form.departments,
     };
+    console.log(payload);
     await onSave?.(payload);
   };
 
-  const toggleDepartment = (dept: string) => {
-    setForm((prev) => ({
-      ...prev,
-      departments: prev.departments.includes(dept) ? prev.departments.filter((d) => d !== dept) : [...prev.departments, dept],
-    }));
+  const toggleDepartment = (dept) => {
+    setForm((prev) => {
+      const exists = prev.departments.includes(dept);
+
+      return {
+        ...prev,
+        departments: exists ? prev.departments.filter((d) => d !== dept) : [...prev.departments, dept],
+      };
+    });
   };
 
   return (

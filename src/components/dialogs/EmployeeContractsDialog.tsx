@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Select from 'react-select';
 import { Label } from '@/components/ui/label';
 import { AlertCircle } from 'lucide-react';
@@ -7,6 +7,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 
 export const EmployeeContractsDialog = ({ open, onOpenChange, selectedContract, selectedEmployees, setSelectedEmployees, employeeOptions, handleSubmit }) => {
   const [errors, setErrors] = useState<{ employees?: string }>({});
+  const [limitErrorOpen, setLimitErrorOpen] = useState(false);
+  const [limitErrorMsg, setLimitErrorMsg] = useState('');
+
+  useEffect(() => {
+    if (!open) {
+      setErrors({});
+      setSelectedEmployees([]);
+    }
+  }, [open]);
+
+  const selectRef = useRef(null);
 
   const handleEmployeeChange = (selected) => {
     if (!selected) {
@@ -15,13 +26,15 @@ export const EmployeeContractsDialog = ({ open, onOpenChange, selectedContract, 
     }
 
     const selectAll = selected.find((s) => s.value === 'ALL');
+    let newSelection = selectAll ? employeeOptions : selected;
 
-    if (selectAll) {
-      setSelectedEmployees(employeeOptions);
-    } else {
-      setSelectedEmployees(selected);
+    if (selectedContract?.numberOfEmployees && newSelection.length > selectedContract.numberOfEmployees) {
+      setLimitErrorMsg(`You can only assign ${selectedContract.numberOfEmployees} employees`);
+      setLimitErrorOpen(true);
+      return;
     }
 
+    setSelectedEmployees(newSelection);
     setErrors({});
   };
 
@@ -30,6 +43,8 @@ export const EmployeeContractsDialog = ({ open, onOpenChange, selectedContract, 
 
     if (!selectedEmployees?.length) {
       newErrors.employees = 'Please select at least one employee';
+    } else if (selectedContract?.numberOfEmployees && selectedEmployees.length > selectedContract.numberOfEmployees) {
+      newErrors.employees = `You can only assign ${selectedContract.numberOfEmployees} employees`;
     }
 
     setErrors(newErrors);
@@ -67,7 +82,7 @@ export const EmployeeContractsDialog = ({ open, onOpenChange, selectedContract, 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()} className="max-w-3xl">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">Assign Employees</DialogTitle>
         </DialogHeader>
@@ -76,21 +91,25 @@ export const EmployeeContractsDialog = ({ open, onOpenChange, selectedContract, 
         {selectedContract && (
           <div className="bg-gray-50 p-3 rounded-md text-sm">
             <p>
-              <span className="font-semibold">Contract:</span> {selectedContract.contractNumber}
+              <span className="font-semibold">Contract No :</span> {selectedContract.contractNumber}
             </p>
             <p>
-              <span className="font-semibold">Contractor:</span> {selectedContract.contractor}
+              <span className="font-semibold">Contractor :</span> {selectedContract.contractor}
+            </p>
+            <p>
+              <span className="font-semibold">Max allowed Employees :</span> {selectedContract.numberOfEmployees}
             </p>
           </div>
         )}
 
         {/* Employee Select */}
-        <div className="space-y-2 mt-4">
-          <Label className="text-sm font-semibold text-gray-700">
+        <div className="space-y-1 mt-1">
+          <Label className="text-md font-semibold text-gray-700">
             Employees <span className="text-red-500">*</span>
           </Label>
 
           <Select
+            ref={selectRef}
             isMulti
             closeMenuOnSelect={false}
             value={selectedEmployees.filter((e) => e.value !== 'ALL')}
@@ -123,7 +142,7 @@ export const EmployeeContractsDialog = ({ open, onOpenChange, selectedContract, 
         </div>
 
         {/* Submit */}
-        <div className="pt-6 flex justify-end">
+        <div className="pt-4 flex justify-end">
           <ConfirmDialog
             triggerClassName="font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
             description="Are you sure you want to assign these employees?"
@@ -134,6 +153,24 @@ export const EmployeeContractsDialog = ({ open, onOpenChange, selectedContract, 
           />
         </div>
       </DialogContent>
+      <Dialog open={limitErrorOpen} onOpenChange={setLimitErrorOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-red-600 flex items-center gap-2">
+              <AlertCircle className="h-5 w-5" />
+              Selection Limit Exceeded
+            </DialogTitle>
+          </DialogHeader>
+
+          <p className="text-sm text-gray-600 mt-2">{limitErrorMsg}</p>
+
+          <div className="flex justify-end mt-4">
+            <button className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600" onClick={() => setLimitErrorOpen(false)}>
+              OK
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 };

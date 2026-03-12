@@ -14,46 +14,60 @@ import { ContractModal } from '@/components/dialogs/ContractModal';
 const ManageContract = () => {
   const [contracts, setContracts] = useState([]);
   const userDetails = useAppSelector((state: RootState) => state.user);
-  // const { unit, departments } = useAppSelector((state: RootState) => state.masterData.data);
   const [showModal, setShowModal] = useState(false);
   const [mode, setMode] = useState<'add' | 'edit'>('add');
   const [selectedRow, setSelectedRow] = React.useState(null);
   const [loading, setLoading] = useState(false);
-  const [units, setUnits] = useState([]);
-  const [departments, setDepartments] = useState([]);
 
-  const fetchStaticData = async () => {
-    try {
-      setLoading(true);
-      const response = await axiosInstance.get('/ContractManagement/get-static-data');
-      setUnits(response.data.data.unit);
-      setDepartments(response.data.data.departments);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  useEffect(() => {
-    fetchStaticData();
-  }, []);
+  const allowedRoles = ['SuperAdmin', 'Contract Manager'];
+  const isSuperAdmin = userDetails?.Roles?.includes('SuperAdmin');
+  // const isContractManager = userDetails?.Roles?.includes('Contract Manager');
 
   const unitOptions = useMemo(() => {
-    if (userDetails.Roles.includes('SuperAdmin')) {
-      return units?.map((u) => ({
-        value: u.unitid,
-        label: u.unitName,
-      }));
-    }
-    return units
-      ?.filter((u) => u.unitName === userDetails.Unit)
-      ?.map((u) => ({
-        value: u.unitid,
-        label: u.unitName,
-      }));
-  }, [units, userDetails]);
+    const map = new Map();
 
-  const departmentOptions = useMemo(() => departments?.map((d) => ({ value: d.departmentid, label: d.department })), [departments]);
+    userDetails?.roleAssigned
+      ?.filter((role) => allowedRoles.includes(role.roleAssign))
+      ?.forEach((role) => {
+        role.units?.forEach((u) => {
+          map.set(u.mstUnitId, {
+            value: u.mstUnitId,
+            label: u.unitName,
+          });
+        });
+      });
+
+    return Array.from(map.values());
+  }, [userDetails]);
+
+  const departmentOptions = useMemo(() => {
+    // SuperAdmin → first unit departments
+    if (isSuperAdmin) {
+      return (
+        userDetails?.roleAssigned?.[0]?.units?.[0]?.departments?.map((d) => ({
+          value: d.departmentId,
+          label: d.departmentName,
+        })) || []
+      );
+    }
+
+    const map = new Map();
+
+    userDetails?.roleAssigned
+      ?.filter((role) => allowedRoles.includes(role.roleAssign))
+      ?.forEach((role) => {
+        role.units?.forEach((u) => {
+          u.departments?.forEach((d) => {
+            map.set(d.departmentId, {
+              value: d.departmentId,
+              label: d.departmentName,
+            });
+          });
+        });
+      });
+
+    return Array.from(map.values());
+  }, [userDetails]);
 
   const fetchContractorsData = async () => {
     try {
@@ -74,6 +88,8 @@ const ManageContract = () => {
     try {
       setLoading(true);
 
+      console.log(formData);
+
       const payload = {
         contractor: formData.contractorName,
         mappings: formData.departments.map((deptId) => ({
@@ -81,6 +97,7 @@ const ManageContract = () => {
           fkDepartmentId: Number(deptId),
         })),
       };
+      console.log(payload);
 
       let response;
 
@@ -104,19 +121,16 @@ const ManageContract = () => {
     } catch (error) {
       showCustomToast({
         title: 'Error',
-        message: 'Operation failed',
+        message: error?.response?.data?.message || "Something went wrong",
         type: 'error',
       });
     } finally {
       setLoading(false);
     }
   };
-  const filteredContracts = useMemo(() => {
-    if (!userDetails.unitId) return contracts;
 
-    if (userDetails.Roles.includes('SuperAdmin')) {
-      return contracts;
-    }
+  const filteredContractors = useMemo(() => {
+    if (isSuperAdmin) return contracts;
 
     return contracts.filter((c) => c.mappings?.[0]?.unitName === userDetails.Unit);
   }, [contracts, userDetails]);
@@ -189,10 +203,10 @@ const ManageContract = () => {
         setShowModal(false);
         fetchContractorsData();
       }
-    } catch (err) {
+    } catch (error) {
       showCustomToast({
         title: 'Error',
-        message: 'Failed to delete contract',
+        message: error?.response?.data?.message || "Something went wrong",
         type: 'error',
       });
     } finally {
@@ -215,13 +229,15 @@ const ManageContract = () => {
             <div className="flex">
               <Button
                 onClick={() => {
-                  const userUnit = units.find((u) => u.unitName === userDetails.Unit);
+                  const userUnit = unitOptions.find((u) => u.label === userDetails.Unit) || unitOptions[0];
+
                   setMode('add');
+
                   setSelectedRow({
                     contractor: '',
                     mappings: [
                       {
-                        unitId: userUnit?.unitid || null,
+                        unitId: userUnit?.value ?? null,
                         departmentId: null,
                       },
                     ],
@@ -235,7 +251,7 @@ const ManageContract = () => {
                 Add Contractor
               </Button>
             </div>
-            <TableList columns={columns} data={filteredContracts} showSearchInput showRefresh onRefresh={() => fetchContractorsData() } />
+            <TableList columns={columns} data={filteredContractors} showSearchInput showRefresh onRefresh={() => fetchContractorsData()} />
           </CardContent>
         </Card>
       </div>

@@ -18,6 +18,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchMasterData } from '@/features/masterData/masterSlice';
 import ManageContract from '@/pages/user/ManageContract';
 import CreateContract from '@/pages/user/CreateContract';
+import ContractHistory from '@/pages/user/ContractHistory';
 
 const AppRoutes = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -48,6 +49,7 @@ const AppRoutes = () => {
             <Route path="/" element={<HomePage />} />
             <Route path="/transfer-request" element={<ManageContract />} />
             <Route path="/manage-contract" element={<CreateContract />} />
+            <Route path="/archive-contract" element={<ContractHistory />} />
           </Route>
         </Route>
         <Route element={<AppLayout isAdmin={true} />}>

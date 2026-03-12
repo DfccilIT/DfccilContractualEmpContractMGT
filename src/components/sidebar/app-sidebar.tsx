@@ -12,6 +12,7 @@ import {
   SquarePen,
   SquareUserRound,
   User2,
+  History,
 } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { NavMain } from '@/components/nav-main';
@@ -29,16 +30,22 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const canAccessAdminDashboard = true;
   const allNavItems: NavItem[] = [
     {
-      title: 'Manage Contractor',
+      title: 'Manage Contractors',
       url: '/transfer-request',
       icon: SquareUserRound,
-      roles: ['SuperAdmin', 'HR'],
+      roles: ['SuperAdmin', 'Contract Manager'],
     },
     {
-      title: 'Manage Contract',
+      title: 'Manage Contracts',
       url: '/manage-contract',
       icon: SquarePen,
-      roles: ['SuperAdmin', 'HR'],
+      roles: ['SuperAdmin', 'Contract Manager'],
+    },
+    {
+      title: 'Archive Contracts',
+      url: '/archive-contract',
+      icon: History,
+      roles: ['SuperAdmin', 'Contract Manager'],
     },
   ];
   const navMainItems = allNavItems.filter((item) => item.roles.some((role) => Roles.includes(role)));

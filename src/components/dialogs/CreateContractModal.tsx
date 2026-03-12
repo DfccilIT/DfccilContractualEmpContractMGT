@@ -36,7 +36,7 @@ export const CreateContractDialog = ({ open, onOpenChange, mode = 'add', units, 
     if (initialData) {
       console.log(initialData);
       console.log(units);
-      console.log(Contractors);
+      console.log(Departments);
 
       const selectedUnit = units?.find((u) => u.label === initialData.unit);
 
@@ -179,7 +179,7 @@ export const CreateContractDialog = ({ open, onOpenChange, mode = 'add', units, 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl">
+      <DialogContent onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()} className="max-w-4xl">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">{isEdit ? 'Update Contract' : 'Add Contract'}</DialogTitle>
         </DialogHeader>

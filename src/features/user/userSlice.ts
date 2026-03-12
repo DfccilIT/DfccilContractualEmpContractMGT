@@ -79,7 +79,7 @@ const initialState: UserState = {
 
 export const fetchUserProfile = createAsyncThunk('user/fetchProfile', async (_, { rejectWithValue }) => {
   try {
-    const response = await axiosInstance.get<ProfileApiResponse>('/Account/profile');
+    const response = await axiosInstance.get<ProfileApiResponse>('/Account/V2/profile');
 
     if (response.data.statusCode !== 200) {
       throw new Error(response.data.message);
