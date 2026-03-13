@@ -93,7 +93,7 @@ const CreateContract = () => {
         startDate: formData.startDate,
         endDate: formData.endDate,
         numberOfEmployees: formData.numberOfEmployees,
-        employeeMasterIds:formData.employeeMasterIds,
+        employeeMasterIds: formData.employeeMasterIds,
       };
 
       let response;
@@ -115,6 +115,7 @@ const CreateContract = () => {
         setSelectedRow(null);
 
         fetchContract();
+        fetchContractEmployees(selectedRow.pkContractId);
       }
     } catch (error) {
       console.log(error);
@@ -149,8 +150,6 @@ const CreateContract = () => {
       const isSuperAdmin = userDetails?.Roles?.includes('SuperAdmin');
 
       let employees = res.data.data;
-
-      console.log(employees);
 
       if (!isSuperAdmin) {
         employees = employees.filter((emp) => emp.location === userDetails.Unit);
@@ -358,17 +357,15 @@ const CreateContract = () => {
                 const contractId = row.pkContractId;
                 const searchText = employeeSearch[contractId] || '';
 
-                useEffect(() => {
-                  if (!contractEmployees[contractId]) {
-                    fetchContractEmployees(contractId);
-                  }
-                }, [contractId]);
+                if (!contractEmployees[contractId]) {
+                  fetchContractEmployees(contractId);
+                }
 
                 const employees = contractEmployees[contractId] || [];
 
-                const filteredEmployees = useMemo(() => {
-                  return employees.filter((emp) => `${emp.employeeCode} ${emp.userName} ${emp.mobile}`.toLowerCase().includes(searchText.toLowerCase()));
-                }, [employees, searchText]);
+                const filteredEmployees = employees.filter((emp) =>
+                  `${emp.employeeCode} ${emp.userName} ${emp.mobile}`.toLowerCase().includes(searchText.toLowerCase())
+                );
 
                 return (
                   <div className="w-full">

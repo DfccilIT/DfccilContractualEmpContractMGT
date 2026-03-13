@@ -33,6 +33,7 @@ export const CreateContractDialog = ({
   const [selectedEmployees, setSelectedEmployees] = useState([]);
   const [limitErrorOpen, setLimitErrorOpen] = useState(false);
   const [limitErrorMsg, setLimitErrorMsg] = useState('');
+  const [employeeSearch, setEmployeeSearch] = useState('');
 
   useEffect(() => {
     if (!open) return;
@@ -255,6 +256,10 @@ export const CreateContractDialog = ({
     });
   };
 
+  const filteredEmployees = availableEmployees.filter((emp) =>
+    `${emp.empCode} ${emp.label} ${emp.department}`.toLowerCase().includes(employeeSearch.toLowerCase())
+  );
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -464,10 +469,20 @@ export const CreateContractDialog = ({
         <div className="grid grid-cols-2 gap-6 mt-4">
           {/* Available Employees */}
           <div className="border rounded-lg p-4">
-            <h3 className="font-semibold text-gray-700 mb-3">Available Employees ({availableEmployees.length})</h3>
+            <div className='flex justify-between'>
+            <h3 className="font-semibold text-gray-700 mb-3">Available Employees ({filteredEmployees.length})</h3>
+            
+            <input
+              type="text"
+              placeholder="Search employee..."
+              value={employeeSearch}
+              onChange={(e) => setEmployeeSearch(e.target.value)}
+              className="w-1/2 mb-3 border rounded-md px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            </div>
 
             <div className="max-h-52 overflow-y-auto space-y-2">
-              {availableEmployees.map((emp) => (
+              {filteredEmployees.map((emp) => (
                 <div
                   key={emp.value}
                   onClick={() => {
@@ -502,7 +517,9 @@ export const CreateContractDialog = ({
           {/* Selected Employees */}
           <div>
             <div className="border rounded-lg p-4">
-              <h3 className="font-semibold text-gray-700 mb-3">Selected Employees ({selectedEmployees.length})</h3>
+              <h3 className="font-semibold text-gray-700 mb-3">
+                {isEdit ? 'Assigned Employees' : 'Selected Employees'} ({selectedEmployees.length})
+              </h3>
 
               <div className="max-h-52 overflow-y-auto space-y-2">
                 {selectedEmployees.length === 0 && <p className="text-sm text-gray-400">No employees selected</p>}

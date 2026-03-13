@@ -23,7 +23,6 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ allowedRoles = [] }) => {
   const isAuthenticated = auth.isAuthenticated;
   const isInitializing = auth.isLoading;
   const redirectHandled = useRef(false);
-  console.log(Roles, 'Roles');
   useEffect(() => {
     if (!isAuthenticated && !isInitializing && !redirectHandled.current) {
       redirectHandled.current = true;
