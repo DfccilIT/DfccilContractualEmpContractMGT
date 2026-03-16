@@ -115,7 +115,9 @@ const CreateContract = () => {
         setSelectedRow(null);
 
         fetchContract();
-        fetchContractEmployees(selectedRow.pkContractId);
+        if (mode === 'edit' && selectedRow?.pkContractId) {
+          fetchContractEmployees(selectedRow.pkContractId);
+        }
       }
     } catch (error) {
       console.log(error);
@@ -225,7 +227,7 @@ const CreateContract = () => {
     {
       accessorKey: 'contractor',
       header: 'Contractor',
-      cell: ({ row }) => <div className="px-2 py-3 font-semibold">{row.original.contractor}</div>,
+      cell: ({ row }) => <div className="px-2 py-3 font-semibold">{row.original.contractor.toUpperCase()}</div>,
     },
     {
       accessorKey: 'numberOfEmployees',

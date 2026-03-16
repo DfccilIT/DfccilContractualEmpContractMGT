@@ -77,7 +77,7 @@ const ContractHistory = () => {
     {
       accessorKey: 'contractor',
       header: 'Contractor',
-      cell: ({ row }) => <div className="px-2 py-3 font-semibold">{row.original.contractor}</div>,
+      cell: ({ row }) => <div className="px-2 py-3 font-semibold">{row.original.contractor.toUpperCase()}</div>,
     },
     {
       accessorKey: 'numberOfEmployees',

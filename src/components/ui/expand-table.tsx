@@ -173,7 +173,7 @@ export default function ExpandableTableList({
                   <tr className="border-b hover:bg-blue-50">
                     <td className="px-3 text-center">
                       {row.getCanExpand() && (
-                        <button onClick={row.getToggleExpandedHandler()} className="p-1 rounded hover:bg-gray-200">
+                        <button onClick={row.getToggleExpandedHandler()} title='View Assigned Employees' className="p-1 rounded hover:bg-gray-200">
                           {row.getIsExpanded() ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
                         </button>
                       )}

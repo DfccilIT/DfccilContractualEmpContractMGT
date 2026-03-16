@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import ConfirmDialog from '../common/ConfirmDialog';
 
 const isEmpty = (v) => v === null || v === undefined || String(v).trim() === '';
 
@@ -44,6 +45,7 @@ export function ContractorModal({ open, onOpenChange, mode = 'add', initialData,
   };
   const [form, setForm] = React.useState<ContractForm>(empty);
   const [errors, setErrors] = React.useState<FormErrors>({});
+  const isEdit = mode === 'edit';
 
   React.useEffect(() => {
     if (!open) return;
@@ -66,10 +68,8 @@ export function ContractorModal({ open, onOpenChange, mode = 'add', initialData,
       e.contractorName = 'Contractor name is required';
     }
 
-    if (mode === 'add') {
-      if (isEmpty(form.unit)) e.unit = 'Unit is required';
-      if (!form.departments.length) e.departments = 'Select at least one department';
-    }
+    if (isEmpty(form.unit)) e.unit = 'Unit is required';
+    if (!form.departments.length) e.departments = 'Select at least one department';
 
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -97,9 +97,17 @@ export function ContractorModal({ open, onOpenChange, mode = 'add', initialData,
     });
   };
 
+  const sortedDepartments = React.useMemo(() => {
+    const selected = departments.filter((d) => form.departments.includes(String(d.value)));
+
+    const unselected = departments.filter((d) => !form.departments.includes(String(d.value)));
+
+    return [...selected, ...unselected];
+  }, [departments, form.departments]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()} className="max-w-2xl">
+      <DialogContent onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()} className="max-w-2xl max-h-[75vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{mode === 'edit' ? 'Edit Contractor' : 'Add Contractor'}</DialogTitle>
         </DialogHeader>
@@ -163,7 +171,7 @@ export function ContractorModal({ open, onOpenChange, mode = 'add', initialData,
             </label>
 
             {/* Departments */}
-            {departments.map((d) => (
+            {sortedDepartments.map((d) => (
               <label key={d.value} className="flex items-center gap-2 text-sm">
                 <input type="checkbox" checked={form.departments.includes(String(d.value))} onChange={() => toggleDepartment(String(d.value))} />
                 {d.label}
@@ -175,13 +183,23 @@ export function ContractorModal({ open, onOpenChange, mode = 'add', initialData,
         </div>
 
         <DialogFooter className="gap-2">
-          <Button variant="outline" type="button" onClick={() => onOpenChange?.(false)}>
+          {/* <Button variant="outline" type="button" onClick={() => onOpenChange?.(false)}>
             Cancel
           </Button>
 
           <Button type="button" onClick={submit} disabled={saving}>
             {saving ? (mode === 'edit' ? 'Updating...' : 'Creating...') : mode === 'edit' ? 'Update' : 'Create'}
-          </Button>
+          </Button> */}
+          <div className="pt-6 flex justify-end">
+            <ConfirmDialog
+              triggerClassName="font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              description={isEdit ? 'Are you sure you want to update this contract?' : 'Are you sure you want to create this contract?'}
+              actionLabel="Confirm"
+              triggerLabel={isEdit ? 'Update' : 'Create'}
+              beforeOpen={() => validate()}
+              onConfirm={submit}
+            />
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

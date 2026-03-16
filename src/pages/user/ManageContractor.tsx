@@ -216,7 +216,7 @@ const ManageContractor = () => {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold">Manage Contractors</h1>
-            <p className="text-gray-600 mt-1">Add, modify, or deactivate contractor mappings for organizational units and departments.</p>
+            <p className="text-gray-600 mt-1">Add, modify, or delete contractor mappings for organizational units and departments.</p>
           </div>
         </div>
         <Card className="border-0 shadow-md">
