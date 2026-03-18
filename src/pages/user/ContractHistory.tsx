@@ -17,6 +17,26 @@ const ContractHistory = () => {
   const [contractHistory, setContractHistory] = useState([]);
   const [contractEmployees, setContractEmployees] = useState({});
   const [employeeSearch, setEmployeeSearch] = useState({});
+  const [selectedUnit, setSelectedUnit] = useState('');
+
+  const allowedRoles = ['SuperAdmin', 'Contract Manager'];
+
+  const unitOptions = useMemo(() => {
+    const map = new Map();
+
+    userDetails?.roleAssigned
+      ?.filter((role) => allowedRoles.includes(role.roleAssign))
+      ?.forEach((role) => {
+        role.units?.forEach((u) => {
+          map.set(u.mstUnitId, {
+            value: u.mstUnitId,
+            label: u.unitName,
+          });
+        });
+      });
+
+    return Array.from(map.values());
+  }, [userDetails]);
 
   const fetchContract = async () => {
     try {
@@ -38,11 +58,13 @@ const ContractHistory = () => {
     if (!userDetails.unitId) return contractHistory;
 
     if (userDetails.Roles.includes('SuperAdmin')) {
-      return contractHistory;
+      if(!selectedUnit) return contractHistory;
+
+      return contractHistory.filter((c)=> c.unit === selectedUnit)
     }
 
     return contractHistory.filter((c) => c.unit === userDetails.Unit);
-  }, [contractHistory, userDetails]);
+  }, [contractHistory, userDetails , selectedUnit]);
 
   const fetchContractEmployees = async (contractId) => {
     try {
@@ -135,6 +157,22 @@ const ContractHistory = () => {
               showSearchInput
               showRefresh
               onRefresh={fetchContract}
+              rightElements={
+                <>
+                  {unitOptions.length > 1 && (
+                    <div className="mb-4 mt-5 w-64">
+                      <select value={selectedUnit} onChange={(e) => setSelectedUnit(e.target.value)} className="w-full border rounded-md p-2">
+                        <option value="">All Units</option>
+                        {unitOptions.map((u) => (
+                          <option key={u.value} value={u.label}>
+                            {u.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </>
+              }
               renderExpanded={(row) => {
                 const contractId = row.pkContractId;
                 const searchText = employeeSearch[contractId] || '';

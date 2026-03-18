@@ -177,8 +177,8 @@ const ManageContractor = () => {
             triggerLabel=""
             onConfirm={() => handleDelete(row.original.contractorId)}
             icon={<Trash2 size={16} />}
-            title="Delete Contract"
-            description="Are you sure you want to delete this contract? This action cannot be undone."
+            title="Delete Contractor"
+            description="Are you sure you want to delete this contractor? This action cannot be undone."
           />
         </div>
       ),

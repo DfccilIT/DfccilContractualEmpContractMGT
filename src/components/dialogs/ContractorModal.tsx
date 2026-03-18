@@ -32,12 +32,11 @@ type ContractModalProps = {
   mode?: 'add' | 'edit';
   initialData?: any;
   onSave?: (data: ContractForm) => void;
-  saving?: boolean;
   units?: Option[];
   departments?: Option[];
 };
 
-export function ContractorModal({ open, onOpenChange, mode = 'add', initialData, onSave, saving = false, units = [], departments = [] }: ContractModalProps) {
+export function ContractorModal({ open, onOpenChange, mode = 'add', initialData, onSave, units = [], departments = [] }: ContractModalProps) {
   const empty = {
     contractorName: '',
     unit: '',
@@ -193,7 +192,7 @@ export function ContractorModal({ open, onOpenChange, mode = 'add', initialData,
           <div className="pt-6 flex justify-end">
             <ConfirmDialog
               triggerClassName="font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-              description={isEdit ? 'Are you sure you want to update this contract?' : 'Are you sure you want to create this contract?'}
+              description={isEdit ? 'Are you sure you want to update this contractor?' : 'Are you sure you want to create this contractor?'}
               actionLabel="Confirm"
               triggerLabel={isEdit ? 'Update' : 'Create'}
               beforeOpen={() => validate()}
