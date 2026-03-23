@@ -5,7 +5,7 @@ import { Navigate } from 'react-router';
 const Home = () => {
   const auth = useAuth();
 
-  return <Navigate to="/transfer-request" replace={true} />;
+  return <Navigate to="/manage-contractor" replace={true} />;
 };
 
 export default Home;

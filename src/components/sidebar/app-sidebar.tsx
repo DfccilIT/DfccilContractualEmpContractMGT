@@ -31,7 +31,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const allNavItems: NavItem[] = [
     {
       title: 'Manage Contractors',
-      url: '/transfer-request',
+      url: '/manage-contractor',
       icon: SquareUserRound,
       roles: ['SuperAdmin', 'Contract Manager'],
     },

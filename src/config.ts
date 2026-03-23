@@ -4,21 +4,21 @@ const DFCCIL_UAT = {
   logoutUrl: 'http://uat.dfccil.com/DfcHome',
   exitUrl: 'http://uatlogin.dfccil.com/applications',
   authUrl: 'https://app2.dfccil.com',
-  clientId: '958d19e3e7c244c589d551433ad844c8',
+  clientId: '11c5d7b6f43c4127a997ad1096b41926',
   postLogout: 'https://uatlogin.dfccil.com/signout',
-  redirectPath: 'transfer-request',
-  applicationId: 52,
+  redirectPath: 'manage-contractor',
+  applicationId: 79,
 };
 
 const DFCCIL_PROD = {
-  apiUrl: 'https://uatndaapi.dfccil.com/api',
+  apiUrl: 'https://dmsapi.dfccil.com/api',
   orgHierarchy: 'https://orgsvc.dfccil.com/api',
   logoutUrl: 'https://it.dfccil.com/Home/Home',
-  exitUrl: 'http://uatlogin.dfccil.com/applications',
-  authUrl: 'https://app2.dfccil.com',
-  clientId: '071ed846a328407ab65d9a1d9a23847a',
-  postLogout: 'https://uatlogin.dfccil.com/signout',
-  redirectPath: 'transfer-request',
+  exitUrl: 'http://dashboard.dfccil.com/applications',
+  authUrl: 'https://auth.dfccil.com',
+  clientId: '61304a607f6947b285618a5775b65674',
+  postLogout: 'https://dashboard.dfccil.com/signout',
+  redirectPath: 'manage-contractor',
   applicationId: 4,
 };
 

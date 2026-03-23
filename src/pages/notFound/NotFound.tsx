@@ -6,7 +6,7 @@ import { ArrowLeft, AlertTriangle } from 'lucide-react';
 const NotFound: React.FC = () => {
   const navigate = useNavigate();
   const handleGoBack = () => {
-    navigate('/transfer-request');
+    navigate('/manage-contractor');
   };
 
   return (

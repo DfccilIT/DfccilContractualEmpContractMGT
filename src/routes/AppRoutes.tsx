@@ -47,7 +47,7 @@ const AppRoutes = () => {
         <Route element={<AppLayout isAdmin={false} />}>
           <Route element={<PrivateRoute allowedRoles={['SuperAdmin', 'Contract Manager']} />}>
             <Route path="/" element={<HomePage />} />
-            <Route path="/transfer-request" element={<ManageContractor />} />
+            <Route path="/manage-contractor" element={<ManageContractor />} />
             <Route path="/manage-contract" element={<CreateContract />} />
             <Route path="/archive-contract" element={<ContractHistory />} />
           </Route>
