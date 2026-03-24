@@ -49,7 +49,7 @@ const AppRoutes = () => {
             <Route path="/" element={<HomePage />} />
             <Route path="/manage-contractor" element={<ManageContractor />} />
             <Route path="/manage-contract" element={<CreateContract />} />
-            <Route path="/archive-contract" element={<ContractHistory />} />
+            <Route path="/archived-contract" element={<ContractHistory />} />
           </Route>
         </Route>
         <Route element={<AppLayout isAdmin={true} />}>

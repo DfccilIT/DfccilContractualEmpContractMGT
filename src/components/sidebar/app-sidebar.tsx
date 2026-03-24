@@ -42,8 +42,8 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
       roles: ['SuperAdmin', 'Contract Manager'],
     },
     {
-      title: 'Archive Contracts',
-      url: '/archive-contract',
+      title: 'Archived Contracts',
+      url: '/archived-contract',
       icon: History,
       roles: ['SuperAdmin', 'Contract Manager'],
     },

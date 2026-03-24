@@ -107,7 +107,7 @@ export function ContractorModal({ open, onOpenChange, mode = 'add', initialData,
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()} className="max-w-2xl max-h-[75vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{mode === 'edit' ? 'Edit Contractor' : 'Add Contractor'}</DialogTitle>
+          <DialogTitle>{mode === 'edit' ? 'Update Contractor' : 'Add Contractor'}</DialogTitle>
         </DialogHeader>
 
         <div className="flex gap-3 mt-4">
@@ -184,9 +184,9 @@ export function ContractorModal({ open, onOpenChange, mode = 'add', initialData,
           <div className="pt-6 flex justify-end">
             <ConfirmDialog
               triggerClassName="font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-              description={isEdit ? 'Are you sure you want to update this contractor?' : 'Are you sure you want to create this contractor?'}
+              description={isEdit ? 'Are you sure you want to update this contractor?' : 'Are you sure you want to add this contractor?'}
               actionLabel="Confirm"
-              triggerLabel={isEdit ? 'Update' : 'Create'}
+              triggerLabel={isEdit ? 'Update' : 'Add'}
               beforeOpen={() => validate()}
               onConfirm={submit}
             />

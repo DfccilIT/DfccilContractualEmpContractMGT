@@ -42,7 +42,7 @@ const ManageContractor = () => {
   }, [userDetails]);
 
   const departmentOptions = useMemo(() => {
-    
+
     if (isSuperAdmin) {
       return (
         userDetails?.roleAssigned?.[0]?.units?.[0]?.departments?.map((d) => ({
@@ -105,7 +105,7 @@ const ManageContractor = () => {
       if (response.data.statusCode === 200) {
         showCustomToast({
           title: 'Success',
-          message: mode === 'edit' ? 'Contract updated successfully' : 'Contract created successfully',
+          message: mode === 'edit' ? 'Contract updated successfully' : 'Contract added successfully',
           type: 'success',
         });
 
@@ -177,8 +177,8 @@ const ManageContractor = () => {
             triggerLabel=""
             onConfirm={() => handleDelete(row.original.contractorId)}
             icon={<Trash2 size={16} />}
-            title="Delete Contractor"
-            description="Are you sure you want to delete this contractor? This action cannot be undone."
+            title="Deactivate Contractor"
+            description="Are you sure you want to deactivate this contractor? This action cannot be undone."
           />
         </div>
       ),

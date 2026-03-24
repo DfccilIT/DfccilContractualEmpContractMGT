@@ -21,7 +21,7 @@ export default function ConfirmDialog({
   disabled = false,
   title = 'Are you sure?',
   description = 'This action cannot be undone.',
-  actionLabel = 'Delete',
+  actionLabel = 'Deactivate',
   icon,
   onConfirm,
   beforeOpen,

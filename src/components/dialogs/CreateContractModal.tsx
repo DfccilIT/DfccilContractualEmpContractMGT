@@ -495,8 +495,8 @@ export const CreateContractDialog = ({
                 >
                   <div className="flex gap-1">
                     <p className="text-sm font-medium">{emp.empCode} |</p>
-                    <p className="text-sm font-medium">{emp.label} |</p>
-                    <p className="text-sm font-medium">{emp.department}</p>
+                    <p className="text-sm font-medium">{emp.label.toUpperCase()} |</p>
+                    <p className="text-sm font-medium">{emp.department.toUpperCase()}</p>
                   </div>
 
                   <button
@@ -561,9 +561,9 @@ export const CreateContractDialog = ({
         <div className="pt-6 flex justify-end">
           <ConfirmDialog
             triggerClassName="font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-            description={isEdit ? 'Are you sure you want to update this contract?' : 'Are you sure you want to create this contract?'}
+            description={isEdit ? 'Are you sure you want to update this contract?' : 'Are you sure you want to add this contract?'}
             actionLabel="Confirm"
-            triggerLabel={isEdit ? 'Update' : 'Create'}
+            triggerLabel={isEdit ? 'Update' : 'Add'}
             beforeOpen={() => validateForm()}
             onConfirm={submit}
           />

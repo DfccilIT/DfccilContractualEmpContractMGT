@@ -140,7 +140,7 @@ const ContractHistory = () => {
       <div className="max-w-[1600px] mx-auto space-y-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold">Archive Contracts</h1>
+            <h1 className="text-2xl font-bold">Archived Contracts</h1>
             <p className="text-gray-600 mt-1">View and manage previously completed or inactive contracts.</p>
           </div>
         </div>

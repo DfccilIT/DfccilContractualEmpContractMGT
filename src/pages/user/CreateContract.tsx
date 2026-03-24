@@ -108,7 +108,7 @@ const CreateContract = () => {
         showCustomToast({
           title: 'Success',
           type: 'success',
-          message: mode === 'edit' ? 'Contract updated successfully' : 'Contract created successfully',
+          message: mode === 'edit' ? 'Contract updated successfully' : 'Contract added successfully',
         });
         fetchEmployees();
         setShowModal(false);
