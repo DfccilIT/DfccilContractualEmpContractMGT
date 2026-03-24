@@ -3,13 +3,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useAppSelector } from '@/app/hooks';
 import { RootState } from '@/app/store';
 import axiosInstance from '@/services/axiosInstance';
-import { showCustomToast } from '@/components/common/showCustomToast';
 import Loader from '@/components/ui/loader';
-import { Button } from '@/components/ui/button';
-import { Pencil, Plus } from 'lucide-react';
-import { CreateContractDialog } from '@/components/dialogs/CreateContractModal';
 import ExpandableTableList from '@/components/ui/expand-table';
-import { EmployeeContractsDialog } from '@/components/dialogs/EmployeeContractsDialog';
 
 const ContractHistory = () => {
   const userDetails = useAppSelector((state: RootState) => state.user);

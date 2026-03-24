@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Edit, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useAppSelector } from '@/app/hooks';
 import { RootState } from '@/app/store';
 import axiosInstance from '@/services/axiosInstance';
@@ -42,7 +42,7 @@ const ManageContractor = () => {
   }, [userDetails]);
 
   const departmentOptions = useMemo(() => {
-    // SuperAdmin → first unit departments
+    
     if (isSuperAdmin) {
       return (
         userDetails?.roleAssigned?.[0]?.units?.[0]?.departments?.map((d) => ({

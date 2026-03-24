@@ -110,10 +110,11 @@ const CreateContract = () => {
           type: 'success',
           message: mode === 'edit' ? 'Contract updated successfully' : 'Contract created successfully',
         });
-
+        fetchEmployees();
         setShowModal(false);
         setSelectedRow(null);
 
+        fetchContractorsData();
         fetchContract();
         if (mode === 'edit' && selectedRow?.pkContractId) {
           fetchContractEmployees(selectedRow.pkContractId);
@@ -177,6 +178,12 @@ const CreateContract = () => {
     fetchContract();
     fetchEmployees();
   }, []);
+
+  useEffect(() => {
+    if (showModal) {
+      fetchEmployees();
+    }
+  }, [showModal]);
 
   const filteredContracts = useMemo(() => {
     let data = contracts;

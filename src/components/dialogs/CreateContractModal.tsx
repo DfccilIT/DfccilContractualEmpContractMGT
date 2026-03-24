@@ -538,7 +538,7 @@ export const CreateContractDialog = ({
 
                     <button
                       onClick={(e) => {
-                        e.stopPropagation(); // prevent double trigger
+                        e.stopPropagation();
                         removeEmployee(emp);
                       }}
                       className="text-red-500 text-xs font-medium hover:text-red-700"

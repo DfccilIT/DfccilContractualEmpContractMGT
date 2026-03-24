@@ -1,6 +1,5 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import ConfirmDialog from '../common/ConfirmDialog';
@@ -182,13 +181,6 @@ export function ContractorModal({ open, onOpenChange, mode = 'add', initialData,
         </div>
 
         <DialogFooter className="gap-2">
-          {/* <Button variant="outline" type="button" onClick={() => onOpenChange?.(false)}>
-            Cancel
-          </Button>
-
-          <Button type="button" onClick={submit} disabled={saving}>
-            {saving ? (mode === 'edit' ? 'Updating...' : 'Creating...') : mode === 'edit' ? 'Update' : 'Create'}
-          </Button> */}
           <div className="pt-6 flex justify-end">
             <ConfirmDialog
               triggerClassName="font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
