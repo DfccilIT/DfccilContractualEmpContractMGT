@@ -1,7 +1,7 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import Select from 'react-select';
 import ConfirmDialog from '../common/ConfirmDialog';
 
 const isEmpty = (v) => v === null || v === undefined || String(v).trim() === '';
@@ -73,6 +73,49 @@ export function ContractorModal({ open, onOpenChange, mode = 'add', initialData,
     return Object.keys(e).length === 0;
   };
 
+  const customSelectStyles = {
+    control: (provided, state) => ({
+      ...provided,
+      minHeight: '40px',
+      height: '40px',
+      borderRadius: '6px',
+      borderColor: state.isFocused ? '#9ca3af' : '#d1d5db',
+      boxShadow: 'none',
+      '&:hover': {
+        borderColor: '#9ca3af',
+      },
+    }),
+    valueContainer: (provided) => ({
+      ...provided,
+      height: '40px',
+      padding: '0 8px',
+    }),
+    input: (provided) => ({
+      ...provided,
+      margin: 0,
+      padding: 0,
+    }),
+    indicatorsContainer: (provided) => ({
+      ...provided,
+      height: '40px',
+    }),
+    menuList: (provided) => ({
+      ...provided,
+      maxHeight: '200px', 
+      paddingTop: 4,
+      paddingBottom: 4,
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isSelected ? '#e5e7eb' : state.isFocused ? '#f3f4f6' : 'white',
+      color: '#111827',
+    }),
+    singleValue: (provided) => ({
+      ...provided,
+      color: '#111827',
+    }),
+  };
+
   const submit = async () => {
     if (!validate()) return;
 
@@ -105,7 +148,11 @@ export function ContractorModal({ open, onOpenChange, mode = 'add', initialData,
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()} className="max-w-2xl max-h-[75vh] overflow-y-auto">
+      <DialogContent
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
+        className="max-w-2xl max-h-[75vh] overflow-y-auto"
+      >
         <DialogHeader>
           <DialogTitle>{mode === 'edit' ? 'Update Contractor' : 'Add Contractor'}</DialogTitle>
         </DialogHeader>
@@ -125,19 +172,21 @@ export function ContractorModal({ open, onOpenChange, mode = 'add', initialData,
           {/* Units */}
           <div className="w-1/2">
             <p className="text-sm font-medium">Units</p>
-            <Select value={form.unit} onValueChange={(val) => setForm((p) => ({ ...p, unit: val }))}>
-              <SelectTrigger className="mt-1">
-                <SelectValue placeholder="Select Unit" />
-              </SelectTrigger>
-
-              <SelectContent>
-                {units.map((u) => (
-                  <SelectItem key={u.value} value={String(u.value)}>
-                    {u.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="mt-1">
+              <Select
+                options={units}
+                value={units.find((u) => String(u.value) === form.unit) || null}
+                onChange={(selected) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    unit: selected ? String(selected.value) : '',
+                  }))
+                }
+                placeholder="Select Unit"
+                isClearable
+                styles={customSelectStyles}
+              />
+            </div>
             <ErrorLine msg={errors.unit} />
           </div>
         </div>

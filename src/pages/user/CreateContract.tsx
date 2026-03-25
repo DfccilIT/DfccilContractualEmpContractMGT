@@ -229,18 +229,27 @@ const CreateContract = () => {
     {
       accessorKey: 'contractNumber',
       header: 'Contract No.',
-      cell: ({ row }) => <div className="px-2 py-3 font-semibold">{row.original.contractNumber}</div>,
+      cell: ({ row }) => <div className="px-2 py-3 font-semibold text-nowrap">{row.original.contractNumber}</div>,
     },
     {
       accessorKey: 'contractor',
       header: 'Contractor',
-      cell: ({ row }) => <div className="px-2 py-3 font-semibold">{row.original.contractor.toUpperCase()}</div>,
+      cell: ({ row }) => <div className="px-2 py-3 font-semibold text-nowrap">{row.original.contractor.toUpperCase()}</div>,
     },
     {
       accessorKey: 'numberOfEmployees',
       header: 'No. of Employees',
-      cell: ({ row }) => <div className="px-2 py-3 font-semibold">{row.original.numberOfEmployees || '-'}</div>,
+      cell: ({ row }) => <div className="px-2 py-3 font-semibold text-nowrap">{row.original.numberOfEmployees || '-'}</div>,
     },
+    ...(isSuperAdmin && !selectedUnit
+      ? [
+          {
+            accessorKey: 'unit',
+            header: 'Unit',
+            cell: ({ row }) => <div className="px-2 py-3 font-semibold text-nowrap">{row.original.unit.toUpperCase() || '-'}</div>,
+          },
+        ]
+      : []),
     {
       accessorKey: 'department',
       header: 'Department',
@@ -250,7 +259,7 @@ const CreateContract = () => {
       accessorKey: 'startDate',
       header: 'Start Date',
       cell: ({ row }) => (
-        <div className="px-2 py-3 font-semibold">
+        <div className="px-2 py-3 font-semibold text-nowrap">
           {new Date(row.original.startDate).toLocaleDateString('en-IN', {
             day: '2-digit',
             month: 'short',
@@ -263,7 +272,7 @@ const CreateContract = () => {
       accessorKey: 'endDate',
       header: 'End Date',
       cell: ({ row }) => (
-        <div className="px-2 py-3 font-semibold">
+        <div className="px-2 py-3 font-semibold text-nowrap">
           {new Date(row.original.endDate).toLocaleDateString('en-IN', {
             day: '2-digit',
             month: 'short',

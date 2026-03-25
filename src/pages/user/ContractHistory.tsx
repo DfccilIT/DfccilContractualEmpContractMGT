@@ -15,6 +15,7 @@ const ContractHistory = () => {
   const [selectedUnit, setSelectedUnit] = useState('');
 
   const allowedRoles = ['SuperAdmin', 'Contract Manager'];
+  const isSuperAdmin = userDetails?.Roles?.includes('SuperAdmin');
 
   const unitOptions = useMemo(() => {
     const map = new Map();
@@ -53,13 +54,13 @@ const ContractHistory = () => {
     if (!userDetails.unitId) return contractHistory;
 
     if (userDetails.Roles.includes('SuperAdmin')) {
-      if(!selectedUnit) return contractHistory;
+      if (!selectedUnit) return contractHistory;
 
-      return contractHistory.filter((c)=> c.unit === selectedUnit)
+      return contractHistory.filter((c) => c.unit === selectedUnit);
     }
 
     return contractHistory.filter((c) => c.unit === userDetails.Unit);
-  }, [contractHistory, userDetails , selectedUnit]);
+  }, [contractHistory, userDetails, selectedUnit]);
 
   const fetchContractEmployees = async (contractId) => {
     try {
@@ -89,18 +90,27 @@ const ContractHistory = () => {
     {
       accessorKey: 'contractNumber',
       header: 'Contract No.',
-      cell: ({ row }) => <div className="px-2 py-3 font-semibold">{row.original.contractNumber}</div>,
+      cell: ({ row }) => <div className="px-2 py-3 font-semibold text-nowrap">{row.original.contractNumber}</div>,
     },
     {
       accessorKey: 'contractor',
       header: 'Contractor',
-      cell: ({ row }) => <div className="px-2 py-3 font-semibold">{row.original.contractor.toUpperCase()}</div>,
+      cell: ({ row }) => <div className="px-2 py-3 font-semibold text-nowrap">{row.original.contractor.toUpperCase()}</div>,
     },
     {
       accessorKey: 'numberOfEmployees',
       header: 'No. of Employees',
       cell: ({ row }) => <div className="px-2 py-3 font-semibold">{row.original.numberOfEmployees || '-'}</div>,
     },
+    ...(isSuperAdmin && !selectedUnit
+      ? [
+          {
+            accessorKey: 'unit',
+            header: 'Unit',
+            cell: ({ row }) => <div className="px-2 py-3 font-semibold text-nowrap">{row.original.unit.toUpperCase() || '-'}</div>,
+          },
+        ]
+      : []),
     {
       accessorKey: 'department',
       header: 'Department',
@@ -110,7 +120,7 @@ const ContractHistory = () => {
       accessorKey: 'startDate',
       header: 'Start Date',
       cell: ({ row }) => (
-        <div className="px-2 py-3 font-semibold">
+        <div className="px-2 py-3 font-semibold text-nowrap">
           {new Date(row.original.startDate).toLocaleDateString('en-IN', {
             day: '2-digit',
             month: 'short',
@@ -123,7 +133,7 @@ const ContractHistory = () => {
       accessorKey: 'endDate',
       header: 'End Date',
       cell: ({ row }) => (
-        <div className="px-2 py-3 font-semibold">
+        <div className="px-2 py-3 font-semibold text-nowrap">
           {new Date(row.original.endDate).toLocaleDateString('en-IN', {
             day: '2-digit',
             month: 'short',

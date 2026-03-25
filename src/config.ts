@@ -23,6 +23,6 @@ const DFCCIL_PROD = {
 };
 
 
-export const environment = DFCCIL_PROD;
+export const environment = DFCCIL_UAT;
 
 export const SESSION_CHECK_INTERVAL = 20 * 60 * 1000;

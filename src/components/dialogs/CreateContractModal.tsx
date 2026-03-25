@@ -3,7 +3,7 @@ import Select from 'react-select';
 import { Label } from '@/components/ui/label';
 import { AlertCircle } from 'lucide-react';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import axiosInstance from '@/services/axiosInstance';
 
 export const CreateContractDialog = ({
@@ -265,12 +265,13 @@ export const CreateContractDialog = ({
       <DialogContent
         onPointerDownOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
-        className="max-w-6xl w-[95vw] max-h-[90vh] overflow-y-auto flex flex-col"
+        className="max-w-6xl w-[95vw] flex flex-col"
       >
+
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">{isEdit ? 'Update Contract' : 'Add Contract'}</DialogTitle>
         </DialogHeader>
-
+        <div className='max-h-[90vh] overflow-y-auto'>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-4">
           {/* Unit */}
           {units.length > 1 && (
@@ -469,16 +470,16 @@ export const CreateContractDialog = ({
         <div className="grid grid-cols-2 gap-6 mt-4">
           {/* Available Employees */}
           <div className="border rounded-lg p-4">
-            <div className='flex justify-between'>
-            <h3 className="font-semibold text-gray-700 mb-3">Available Employees ({filteredEmployees.length})</h3>
-            
-            <input
-              type="text"
-              placeholder="Search employee..."
-              value={employeeSearch}
-              onChange={(e) => setEmployeeSearch(e.target.value)}
-              className="w-1/2 mb-3 border rounded-md px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            <div className="flex justify-between">
+              <h3 className="font-semibold text-gray-700 mb-3">Available Employees ({filteredEmployees.length})</h3>
+
+              <input
+                type="text"
+                placeholder="Search employee..."
+                value={employeeSearch}
+                onChange={(e) => setEmployeeSearch(e.target.value)}
+                className="w-1/2 mb-3 border rounded-md px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
 
             <div className="max-h-52 overflow-y-auto space-y-2">
@@ -557,17 +558,19 @@ export const CreateContractDialog = ({
             )}
           </div>
         </div>
-
-        <div className="pt-6 flex justify-end">
-          <ConfirmDialog
-            triggerClassName="font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-            description={isEdit ? 'Are you sure you want to update this contract?' : 'Are you sure you want to add this contract?'}
-            actionLabel="Confirm"
-            triggerLabel={isEdit ? 'Update' : 'Add'}
-            beforeOpen={() => validateForm()}
-            onConfirm={submit}
-          />
         </div>
+        <DialogFooter>
+          <div className="pt-6 flex justify-end">
+            <ConfirmDialog
+              triggerClassName="font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              description={isEdit ? 'Are you sure you want to update this contract?' : 'Are you sure you want to add this contract?'}
+              actionLabel="Confirm"
+              triggerLabel={isEdit ? 'Update' : 'Add'}
+              beforeOpen={() => validateForm()}
+              onConfirm={submit}
+            />
+          </div>
+        </DialogFooter>
       </DialogContent>
       <Dialog open={limitErrorOpen} onOpenChange={setLimitErrorOpen}>
         <DialogContent className="max-w-sm">
