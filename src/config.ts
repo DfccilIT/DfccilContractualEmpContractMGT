@@ -19,11 +19,10 @@ const DFCCIL_PROD = {
   clientId: '61304a607f6947b285618a5775b65674',
   postLogout: 'https://dashboard.dfccil.com/signout',
   redirectPath: 'manage-contractor',
-  applicationId: 4,
+  applicationId: 75,
 };
 
-// https://github.com/DfccilIT/TransferModuleFrontEnd.git
 
-export const environment = DFCCIL_UAT;
+export const environment = DFCCIL_PROD;
 
 export const SESSION_CHECK_INTERVAL = 20 * 60 * 1000;

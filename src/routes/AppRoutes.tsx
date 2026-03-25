@@ -45,7 +45,7 @@ const AppRoutes = () => {
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/logout-notification" element={<FrontChannelLogout />} />
         <Route element={<AppLayout isAdmin={false} />}>
-          <Route element={<PrivateRoute allowedRoles={['SuperAdmin', 'Contract Manager']} />}>
+          <Route element={<PrivateRoute allowedRoles={['SuperAdmin', 'Contract Manager' , 'Contractual Employee Approver']} />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/manage-contractor" element={<ManageContractor />} />
             <Route path="/manage-contract" element={<CreateContract />} />
@@ -53,7 +53,7 @@ const AppRoutes = () => {
           </Route>
         </Route>
         <Route element={<AppLayout isAdmin={true} />}>
-          <Route element={<PrivateRoute allowedRoles={['SuperAdmin', 'Contract Manager']} />}>
+          <Route element={<PrivateRoute allowedRoles={['SuperAdmin', 'Contract Manager' , 'Contractual Employee Approver']} />}>
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
           </Route>
         </Route>
