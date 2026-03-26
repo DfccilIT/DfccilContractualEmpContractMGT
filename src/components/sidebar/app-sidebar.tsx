@@ -33,25 +33,25 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
       title: 'Manage Contractors',
       url: '/manage-contractor',
       icon: SquareUserRound,
-      roles: ['SuperAdmin', 'Contract Manager' , 'Contractual Employee Approver'],
+      roles: ['SuperAdmin', 'Contract Manager', 'Contractual Employee Approver'],
     },
     {
       title: 'Manage Contracts',
       url: '/manage-contract',
       icon: SquarePen,
-      roles: ['SuperAdmin', 'Contract Manager' , 'Contractual Employee Approver'],
+      roles: ['SuperAdmin', 'Contract Manager', 'Contractual Employee Approver'],
     },
     {
       title: 'Archived Contracts',
       url: '/archived-contract',
       icon: History,
-      roles: ['SuperAdmin', 'Contract Manager' , 'Contractual Employee Approver'],
+      roles: ['SuperAdmin', 'Contract Manager', 'Contractual Employee Approver'],
     },
     {
       title: 'Contratual',
       url: '/contratual',
       icon: User2,
-      roles: ['SuperAdmin', 'HR'],
+      roles: ['SuperAdmin', 'HR', 'Contract Manager', 'Contractual Employee Approver'],
     },
   ];
   const navMainItems = allNavItems.filter((item) => item.roles.some((role) => Roles.includes(role)));

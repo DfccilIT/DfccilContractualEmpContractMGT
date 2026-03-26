@@ -143,12 +143,12 @@ const userSlice = createSlice({
         state.employeeMasterAutoId = data?.empId || null;
         state.globelAssigndRolesAndUnits = data.globelAssigndRolesAndUnits;
 
-        const roles = data?.globelAssigndRolesAndUnits?.map((r: any) => r.roleAssign) || [];
-
+        const roles = data?.dmsRoles?.map((r: any) => r.roleAssign) || [];
+        
         state.Roles = [...new Set([...roles, 'user'])];
         state.roleAssigned = data?.globelAssigndRolesAndUnits || [];
         const approvalDepartments = data?.dmsRoles?.find((ele) => ele?.roleAssign === 'Contractual Employee Approver');
-        state.departmentList = approvalDepartments?.units[0]?.departments?.map((ele) => ele?.toLowerCase());
+        state.departmentList = approvalDepartments?.units[0]?.departments?.map((ele) => ele?.departmentName?.toLowerCase());
 
         state.Roles = [...new Set([...roles, 'user'])];
         state.roleAssigned = data?.dmsRoles || [];

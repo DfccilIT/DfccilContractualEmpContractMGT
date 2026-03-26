@@ -79,20 +79,20 @@ const EmployeeApproval: React.FC = () => {
   const dispatch = useAppDispatch();
   console.log(departmentList, 'departmentList');
   const unitOptions = useMemo(() => {
-    if (unitList.length === 0) return [];
+    if (unitList?.length === 0) return [];
     // If SuperAdmin, show all units from masterData
     if (Roles.includes('SuperAdmin')) {
-      return unitList.map((unit) => ({
+      return unitList?.map((unit) => ({
         label: unit.name,
         value: unit.id,
       }));
     }
 
     // For regular users, use globelAssigndRolesAndUnits
-    if (globelAssigndRolesAndUnits.length > 0) {
+    if (globelAssigndRolesAndUnits?.length > 0) {
       // Extract units from globelAssigndRolesAndUnits
-      const assignedUnits = globelAssigndRolesAndUnits.flatMap((item) =>
-        item.units.map((unit) => ({
+      const assignedUnits = globelAssigndRolesAndUnits?.flatMap((item) =>
+        item?.units?.map((unit) => ({
           label: unit.unitName,
           value: unit.unitId,
         }))
