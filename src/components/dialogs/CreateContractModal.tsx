@@ -25,7 +25,7 @@ export const CreateContractDialog = ({
     contractNo: '',
     startDate: '',
     endDate: '',
-    noOfEmployees: null,
+    noOfEmployees: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -94,7 +94,7 @@ export const CreateContractDialog = ({
         contractNo: initialData.contractNumber,
         startDate: initialData.startDate?.split('T')[0],
         endDate: initialData.endDate?.split('T')[0],
-        noOfEmployees: initialData.numberOfEmployees,
+        noOfEmployees: initialData.numberOfEmployees?.toString() || '',
       });
     } else {
       if (units?.length === 1) {
@@ -123,7 +123,7 @@ export const CreateContractDialog = ({
 
     if (!formData.endDate) newErrors.endDate = 'End date is required';
 
-    if (!formData.noOfEmployees || formData.noOfEmployees <= 0) newErrors.noOfEmployees = 'Employee count must be greater than 0';
+    if (!formData.noOfEmployees || Number(formData.noOfEmployees) <= 0) newErrors.noOfEmployees = 'Employee count must be greater than 0';
 
     if (formData.startDate && formData.endDate && new Date(formData.endDate) < new Date(formData.startDate)) {
       newErrors.endDate = 'End date cannot be before start date';
@@ -216,7 +216,7 @@ export const CreateContractDialog = ({
       contractNumber: formData.contractNo,
       startDate: formData.startDate,
       endDate: formData.endDate,
-      numberOfEmployees: formData.noOfEmployees,
+      numberOfEmployees: Number(formData.noOfEmployees),
       employeeMasterIds: selectedEmployees.map((e) => e.value),
     };
     await onSave?.(payload);
@@ -229,7 +229,7 @@ export const CreateContractDialog = ({
       return;
     }
 
-    if (selectedEmployees.length >= formData.noOfEmployees) {
+    if (selectedEmployees.length >= Number(formData.noOfEmployees)) {
       setLimitErrorMsg(`You can only select ${formData.noOfEmployees} employees`);
       setLimitErrorOpen(true);
       return;
@@ -262,302 +262,297 @@ export const CreateContractDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        onPointerDownOutside={(e) => e.preventDefault()}
-        onEscapeKeyDown={(e) => e.preventDefault()}
-        className="max-w-6xl w-[95vw] flex flex-col"
-      >
-
+      <DialogContent onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()} className="max-w-6xl w-[95vw] flex flex-col">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">{isEdit ? 'Update Contract' : 'Add Contract'}</DialogTitle>
         </DialogHeader>
-        <div className='max-h-[90vh] overflow-y-auto'>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-          {/* Unit */}
-          {units.length > 1 && (
+        <div className="max-h-[90vh] overflow-y-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+            {/* Unit */}
+            {units.length > 1 && (
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-gray-700">
+                  Unit <span className="text-red-500">*</span>
+                </Label>
+
+                <Select
+                  value={formData.unit}
+                  onChange={(val) => {
+                    setFormData((prev) => ({ ...prev, unit: val }));
+                    clearError('unit');
+                  }}
+                  options={units}
+                  placeholder="Select Unit"
+                  isClearable
+                  styles={customSelectStyles}
+                />
+
+                {errors.unit && (
+                  <p className="text-xs text-red-500 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {errors.unit}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Contractor */}
             <div className="space-y-2">
               <Label className="text-sm font-semibold text-gray-700">
-                Unit <span className="text-red-500">*</span>
+                Contractor <span className="text-red-500">*</span>
               </Label>
 
               <Select
-                value={formData.unit}
+                value={formData.contractor}
                 onChange={(val) => {
-                  setFormData((prev) => ({ ...prev, unit: val }));
-                  clearError('unit');
+                  setFormData((prev) => ({
+                    ...prev,
+                    contractor: val,
+                    department: null,
+                  }));
+                  clearError('contractor');
                 }}
-                options={units}
-                placeholder="Select Unit"
+                options={filteredContractors}
+                placeholder="Select Contractor"
                 isClearable
                 styles={customSelectStyles}
               />
 
-              {errors.unit && (
+              {errors.contractor && (
                 <p className="text-xs text-red-500 flex items-center gap-1">
                   <AlertCircle className="h-3 w-3" />
-                  {errors.unit}
+                  {errors.contractor}
                 </p>
               )}
             </div>
-          )}
 
-          {/* Contractor */}
-          <div className="space-y-2">
-            <Label className="text-sm font-semibold text-gray-700">
-              Contractor <span className="text-red-500">*</span>
-            </Label>
+            {/* Department */}
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold text-gray-700">
+                Department <span className="text-red-500">*</span>
+              </Label>
 
-            <Select
-              value={formData.contractor}
-              onChange={(val) => {
-                setFormData((prev) => ({
-                  ...prev,
-                  contractor: val,
-                  department: null,
-                }));
-                clearError('contractor');
-              }}
-              options={filteredContractors}
-              placeholder="Select Contractor"
-              isClearable
-              styles={customSelectStyles}
-            />
+              <Select
+                value={formData.department}
+                onChange={(val) => {
+                  setFormData((prev) => ({ ...prev, department: val }));
+                  clearError('department');
+                }}
+                options={filteredDepartments}
+                placeholder="Select Department"
+                isClearable
+                styles={customSelectStyles}
+              />
 
-            {errors.contractor && (
-              <p className="text-xs text-red-500 flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" />
-                {errors.contractor}
-              </p>
-            )}
-          </div>
+              {errors.department && (
+                <p className="text-xs text-red-500 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {errors.department}
+                </p>
+              )}
+            </div>
 
-          {/* Department */}
-          <div className="space-y-2">
-            <Label className="text-sm font-semibold text-gray-700">
-              Department <span className="text-red-500">*</span>
-            </Label>
-
-            <Select
-              value={formData.department}
-              onChange={(val) => {
-                setFormData((prev) => ({ ...prev, department: val }));
-                clearError('department');
-              }}
-              options={filteredDepartments}
-              placeholder="Select Department"
-              isClearable
-              styles={customSelectStyles}
-            />
-
-            {errors.department && (
-              <p className="text-xs text-red-500 flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" />
-                {errors.department}
-              </p>
-            )}
-          </div>
-
-          {/* Contract No */}
-          <div className="space-y-2">
-            <Label className="text-sm font-semibold text-gray-700">
-              Contract No <span className="text-red-500">*</span>
-            </Label>
-
-            <input
-              type="text"
-              value={formData.contractNo}
-              onChange={(e) => {
-                setFormData((prev) => ({
-                  ...prev,
-                  contractNo: e.target.value,
-                }));
-                clearError('contractNo');
-              }}
-              placeholder="Enter Contract Number"
-              className="w-full border rounded-md px-3 py-2 text-sm"
-            />
-
-            {errors.contractNo && (
-              <p className="text-xs text-red-500 flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" />
-                {errors.contractNo}
-              </p>
-            )}
-          </div>
-
-          {/* Start Date */}
-          <div className="space-y-2">
-            <Label className="text-sm font-semibold text-gray-700">
-              Start Date <span className="text-red-500">*</span>
-            </Label>
-
-            <input
-              type="date"
-              value={formData.startDate}
-              onChange={(e) => {
-                setFormData((prev) => ({
-                  ...prev,
-                  startDate: e.target.value,
-                }));
-                clearError('startDate');
-              }}
-              className="w-full border rounded-md px-3 py-2 text-sm"
-            />
-
-            {errors.startDate && (
-              <p className="text-xs text-red-500 flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" />
-                {errors.startDate}
-              </p>
-            )}
-          </div>
-
-          {/* End Date */}
-          <div className="space-y-2">
-            <Label className="text-sm font-semibold text-gray-700">
-              End Date <span className="text-red-500">*</span>
-            </Label>
-
-            <input
-              type="date"
-              value={formData.endDate}
-              onChange={(e) => {
-                setFormData((prev) => ({
-                  ...prev,
-                  endDate: e.target.value,
-                }));
-                clearError('endDate');
-              }}
-              className="w-full border rounded-md px-3 py-2 text-sm"
-            />
-
-            {errors.endDate && (
-              <p className="text-xs text-red-500 flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" />
-                {errors.endDate}
-              </p>
-            )}
-          </div>
-
-          {/* No of Employees */}
-          <div className="space-y-2">
-            <Label className="text-sm font-semibold text-gray-700">
-              No of Employees <span className="text-red-500">*</span>
-            </Label>
-
-            <input
-              type="number"
-              value={formData.noOfEmployees}
-              onChange={(e) => {
-                setFormData((prev) => ({
-                  ...prev,
-                  noOfEmployees: Number(e.target.value),
-                }));
-                clearError('noOfEmployees');
-              }}
-              placeholder="Enter number"
-              className="w-full border rounded-md px-3 py-2 text-sm"
-            />
-
-            {errors.noOfEmployees && (
-              <p className="text-xs text-red-500 flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" />
-                {errors.noOfEmployees}
-              </p>
-            )}
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-6 mt-4">
-          {/* Available Employees */}
-          <div className="border rounded-lg p-4">
-            <div className="flex justify-between">
-              <h3 className="font-semibold text-gray-700 mb-3">Available Employees ({filteredEmployees.length})</h3>
+            {/* Contract No */}
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold text-gray-700">
+                Contract No <span className="text-red-500">*</span>
+              </Label>
 
               <input
                 type="text"
-                placeholder="Search employee..."
-                value={employeeSearch}
-                onChange={(e) => setEmployeeSearch(e.target.value)}
-                className="w-1/2 mb-3 border rounded-md px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={formData.contractNo}
+                onChange={(e) => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    contractNo: e.target.value,
+                  }));
+                  clearError('contractNo');
+                }}
+                placeholder="Enter Contract Number"
+                className="w-full border rounded-md px-3 py-2 text-sm"
               />
+
+              {errors.contractNo && (
+                <p className="text-xs text-red-500 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {errors.contractNo}
+                </p>
+              )}
             </div>
 
-            <div className="max-h-52 overflow-y-auto space-y-2">
-              {filteredEmployees.map((emp) => (
-                <div
-                  key={emp.value}
-                  onClick={() => {
-                    // if (!formData.noOfEmployees) return;
-                    addEmployee(emp);
-                  }}
-                  //                 className={`flex justify-between items-center border rounded-md px-3 py-2
-                  // ${!formData.noOfEmployees ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-gray-50'}`}
-                  className="flex justify-between items-center border rounded-md px-3 py-2 cursor-pointer hover:bg-gray-50"
-                >
-                  <div className="flex gap-1">
-                    <p className="text-sm font-medium">{emp.empCode} |</p>
-                    <p className="text-sm font-medium">{emp.label.toUpperCase()} |</p>
-                    <p className="text-sm font-medium">{emp.department.toUpperCase()}</p>
-                  </div>
+            {/* Start Date */}
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold text-gray-700">
+                Start Date <span className="text-red-500">*</span>
+              </Label>
 
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      addEmployee(emp);
-                    }}
-                    // disabled={!formData.noOfEmployees}
-                    // className={`text-xs font-medium ${!formData.noOfEmployees ? 'text-gray-400 cursor-not-allowed' : 'text-blue-600 hover:text-blue-800'}`}
-                    className="text-xs font-medium text-blue-600 hover:text-blue-800"
-                  >
-                    Add
-                  </button>
-                </div>
-              ))}
+              <input
+                type="date"
+                value={formData.startDate}
+                onChange={(e) => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    startDate: e.target.value,
+                  }));
+                  clearError('startDate');
+                }}
+                className="w-full border rounded-md px-3 py-2 text-sm"
+              />
+
+              {errors.startDate && (
+                <p className="text-xs text-red-500 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {errors.startDate}
+                </p>
+              )}
+            </div>
+
+            {/* End Date */}
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold text-gray-700">
+                End Date <span className="text-red-500">*</span>
+              </Label>
+
+              <input
+                type="date"
+                value={formData.endDate}
+                onChange={(e) => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    endDate: e.target.value,
+                  }));
+                  clearError('endDate');
+                }}
+                className="w-full border rounded-md px-3 py-2 text-sm"
+              />
+
+              {errors.endDate && (
+                <p className="text-xs text-red-500 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {errors.endDate}
+                </p>
+              )}
+            </div>
+
+            {/* No of Employees */}
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold text-gray-700">
+                No of Employees <span className="text-red-500">*</span>
+              </Label>
+
+              <input
+                type="number"
+                value={formData.noOfEmployees}
+                onChange={(e) => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    noOfEmployees: e.target.value,
+                  }));
+                  clearError('noOfEmployees');
+                }}
+                placeholder="Enter number"
+                className="w-full border rounded-md px-3 py-2 text-sm"
+              />
+
+              {errors.noOfEmployees && (
+                <p className="text-xs text-red-500 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {errors.noOfEmployees}
+                </p>
+              )}
             </div>
           </div>
-          {/* Selected Employees */}
-          <div>
+          <div className="grid grid-cols-2 gap-6 mt-4">
+            {/* Available Employees */}
             <div className="border rounded-lg p-4">
-              <h3 className="font-semibold text-gray-700 mb-3">
-                {isEdit ? 'Assigned Employees' : 'Selected Employees'} ({selectedEmployees.length})
-              </h3>
+              <div className="flex justify-between">
+                <h3 className="font-semibold text-gray-700 mb-3">Available Employees ({filteredEmployees.length})</h3>
+
+                <input
+                  type="text"
+                  placeholder="Search employee..."
+                  value={employeeSearch}
+                  onChange={(e) => setEmployeeSearch(e.target.value)}
+                  className="w-1/2 mb-3 border rounded-md px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
 
               <div className="max-h-52 overflow-y-auto space-y-2">
-                {selectedEmployees.length === 0 && <p className="text-sm text-gray-400">No employees selected</p>}
-
-                {selectedEmployees.map((emp) => (
+                {filteredEmployees.map((emp) => (
                   <div
                     key={emp.value}
-                    onClick={() => removeEmployee(emp)}
-                    className="flex justify-between items-center border rounded-md px-3 py-2 bg-blue-50 cursor-pointer hover:bg-blue-100 transition-colors"
+                    onClick={() => {
+                      // if (!formData.noOfEmployees) return;
+                      addEmployee(emp);
+                    }}
+                    //                 className={`flex justify-between items-center border rounded-md px-3 py-2
+                    // ${!formData.noOfEmployees ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-gray-50'}`}
+                    className="flex justify-between items-center border rounded-md px-3 py-2 cursor-pointer hover:bg-gray-50"
                   >
-                    <div className="flex gap-2">
+                    <div className="flex gap-1">
                       <p className="text-sm font-medium">{emp.empCode} |</p>
-                      <p className="text-sm font-medium">{emp.label} |</p>
-                      <p className="text-sm font-medium">{emp.department}</p>
+                      <p className="text-sm font-medium">{emp.label.toUpperCase()} |</p>
+                      <p className="text-sm font-medium">{emp.department.toUpperCase()}</p>
                     </div>
 
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        removeEmployee(emp);
+                        addEmployee(emp);
                       }}
-                      className="text-red-500 text-xs font-medium hover:text-red-700"
+                      // disabled={!formData.noOfEmployees}
+                      // className={`text-xs font-medium ${!formData.noOfEmployees ? 'text-gray-400 cursor-not-allowed' : 'text-blue-600 hover:text-blue-800'}`}
+                      className="text-xs font-medium text-blue-600 hover:text-blue-800"
                     >
-                      Remove
+                      Add
                     </button>
                   </div>
                 ))}
               </div>
             </div>
-            {errors.employees && (
-              <p className="text-xs text-red-500 flex items-center gap-1 mt-2">
-                <AlertCircle className="h-3 w-3" />
-                {errors.employees}
-              </p>
-            )}
+            {/* Selected Employees */}
+            <div>
+              <div className="border rounded-lg p-4">
+                <h3 className="font-semibold text-gray-700 mb-3">
+                  {isEdit ? 'Assigned Employees' : 'Selected Employees'} ({selectedEmployees.length})
+                </h3>
+
+                <div className="max-h-52 overflow-y-auto space-y-2">
+                  {selectedEmployees.length === 0 && <p className="text-sm text-gray-400">No employees selected</p>}
+
+                  {selectedEmployees.map((emp) => (
+                    <div
+                      key={emp.value}
+                      onClick={() => removeEmployee(emp)}
+                      className="flex justify-between items-center border rounded-md px-3 py-2 bg-blue-50 cursor-pointer hover:bg-blue-100 transition-colors"
+                    >
+                      <div className="flex gap-2">
+                        <p className="text-sm font-medium">{emp.empCode} |</p>
+                        <p className="text-sm font-medium">{emp.label} |</p>
+                        <p className="text-sm font-medium">{emp.department}</p>
+                      </div>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeEmployee(emp);
+                        }}
+                        className="text-red-500 text-xs font-medium hover:text-red-700"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {errors.employees && (
+                <p className="text-xs text-red-500 flex items-center gap-1 mt-2">
+                  <AlertCircle className="h-3 w-3" />
+                  {errors.employees}
+                </p>
+              )}
+            </div>
           </div>
-        </div>
         </div>
         <DialogFooter>
           <div className="pt-6 flex justify-end">

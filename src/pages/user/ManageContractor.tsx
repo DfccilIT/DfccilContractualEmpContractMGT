@@ -42,7 +42,6 @@ const ManageContractor = () => {
   }, [userDetails]);
 
   const departmentOptions = useMemo(() => {
-
     if (isSuperAdmin) {
       return (
         userDetails?.roleAssigned?.[0]?.units?.[0]?.departments?.map((d) => ({
@@ -172,14 +171,16 @@ const ManageContractor = () => {
           </Button>
 
           {/* Delete Button */}
-          <ConfirmDialog
-            triggerClassName="h-8 w-8 p-0 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100"
-            triggerLabel=""
-            onConfirm={() => handleDelete(row.original.contractorId)}
-            icon={<Trash2 size={16} />}
-            title="Deactivate Contractor"
-            description="Are you sure you want to deactivate this contractor? This action cannot be undone."
-          />
+          {isSuperAdmin && (
+            <ConfirmDialog
+              triggerClassName="h-8 w-8 p-0 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100"
+              triggerLabel=""
+              onConfirm={() => handleDelete(row.original.contractorId)}
+              icon={<Trash2 size={16} />}
+              title="Deactivate Contractor"
+              description="Are you sure you want to deactivate this contractor? This action cannot be undone."
+            />
+          )}
         </div>
       ),
     },
