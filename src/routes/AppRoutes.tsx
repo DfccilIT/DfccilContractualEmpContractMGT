@@ -19,6 +19,7 @@ import { fetchMasterData } from '@/features/masterData/masterSlice';
 import ManageContract from '@/pages/user/ManageContract';
 import CreateContract from '@/pages/user/CreateContract';
 import EmployeeContractsMapping from '@/pages/user/EmployeeContractsMapping';
+import EmployeeApproval from '@/pages/admin/EmployeeApproval';
 
 const AppRoutes = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -49,6 +50,7 @@ const AppRoutes = () => {
             <Route path="/" element={<HomePage />} />
             <Route path="/transfer-request" element={<ManageContract />} />
             <Route path="/manage-contract" element={<CreateContract />} />
+            <Route path="/contratual" element={<EmployeeApproval />} />
             <Route path="/employee-contract-mapping" element={<EmployeeContractsMapping />} />
           </Route>
         </Route>

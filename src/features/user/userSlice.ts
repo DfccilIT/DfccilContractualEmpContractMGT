@@ -1,7 +1,14 @@
-import { getDelegationInfoFromSession } from "@/lib/helperFunction";
-import axiosInstance from "@/services/axiosInstance";
-import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
-
+import { getDelegationInfoFromSession } from '@/lib/helperFunction';
+import axiosInstance from '@/services/axiosInstance';
+import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
+interface Unit {
+  unitId: number;
+  unitName: string;
+}
+interface GlobelAssigndRoleAndUnit {
+  roleAssign: string;
+  units: Unit[];
+}
 export interface UserState {
   Roles: string[];
   name: string | null;
@@ -25,6 +32,8 @@ export interface UserState {
   delegateeEmpCode?: string | null;
   delegatedApplications?: string | null;
   delegatedApplicationNames?: string | null;
+  departmentList?: string[];
+  globelAssigndRolesAndUnits: GlobelAssigndRoleAndUnit[];
 }
 
 interface ProfileApiResponse {
@@ -71,36 +80,31 @@ const initialState: UserState = {
   delegateeEmpCode: null,
   delegatedApplications: null,
   delegatedApplicationNames: null,
+  departmentList: [],
+  globelAssigndRolesAndUnits: [],
 };
 
-export const fetchUserProfile = createAsyncThunk(
-  "user/fetchProfile",
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await axiosInstance.get<ProfileApiResponse>("/Account/profile");
+export const fetchUserProfile = createAsyncThunk('user/fetchProfile', async (_, { rejectWithValue }) => {
+  try {
+    const response = await axiosInstance.get<ProfileApiResponse>('/Account/profile');
 
-      if (response.data.statusCode !== 200) {
-        throw new Error(response.data.message);
-      }
-
-      const delegationInfo = getDelegationInfoFromSession();
-
-      return {
-        ...response.data.data,
-        ...delegationInfo,
-      };
-    } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        error.message ||
-        "Failed to fetch user profile"
-      );
+    if (response.data.statusCode !== 200) {
+      throw new Error(response.data.message);
     }
+
+    const delegationInfo = getDelegationInfoFromSession();
+
+    return {
+      ...response.data.data,
+      ...delegationInfo,
+    };
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data?.message || error.message || 'Failed to fetch user profile');
   }
-);
+});
 
 const userSlice = createSlice({
-  name: "user",
+  name: 'user',
   initialState,
   reducers: {
     updateUser(state, action: PayloadAction<Partial<UserState>>) {
@@ -123,23 +127,24 @@ const userSlice = createSlice({
 
         const data = action.payload;
 
-        state.EmpCode = data?.empCode || "";
-        state.name = data?.name || "";
-        state.Designation = data?.designation || "";
-        state.Unit = data?.unit || "";
+        state.EmpCode = data?.empCode || '';
+        state.name = data?.name || '';
+        state.Designation = data?.designation || '';
+        state.Unit = data?.unit || '';
         state.unitId = data?.unitId || null;
-        state.Department = data?.department || "";
-        state.Lavel = data?.level || "";
-        state.Mobile = data?.mobile || "";
-        state.Email = data?.email || "";
+        state.Department = data?.department || '';
+        state.Lavel = data?.level || '';
+        state.Mobile = data?.mobile || '';
+        state.Email = data?.email || '';
         state.employeeMasterAutoId = data?.empId || null;
+        state.globelAssigndRolesAndUnits = data.globelAssigndRolesAndUnits;
 
-        const roles =
-          data?.globelAssigndRolesAndUnits?.map((r: any) => r.roleAssign) || [];
+        const roles = data?.globelAssigndRolesAndUnits?.map((r: any) => r.roleAssign) || [];
 
-        state.Roles = [...new Set([...roles, "user"])];
+        state.Roles = [...new Set([...roles, 'user'])];
         state.roleAssigned = data?.globelAssigndRolesAndUnits || [];
-
+        const approvalDepartments = data?.dmsRoles?.find((ele) => ele?.roleAssign === 'Contractual Employee Approver');
+        state.departmentList = approvalDepartments?.units[0]?.departments?.map((ele) => ele?.toLowerCase());
         state.isDelegatedUser = data?.isDelegatedUser ?? false;
         state.delegateeEmpCode = data?.delegateeEmpCode ?? null;
         state.delegatedApplications = data?.delegatedApplications ?? null;

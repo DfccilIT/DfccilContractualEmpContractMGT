@@ -46,6 +46,12 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
       icon: User2,
       roles: ['SuperAdmin', 'HR'],
     },
+    {
+      title: 'Contratual',
+      url: '/contratual',
+      icon: User2,
+      roles: ['SuperAdmin', 'HR'],
+    },
   ];
   const navMainItems = allNavItems.filter((item) => item.roles.some((role) => Roles.includes(role)));
   const handleLogout = () => {
