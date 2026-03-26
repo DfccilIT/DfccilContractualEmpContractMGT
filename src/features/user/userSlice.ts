@@ -141,18 +141,14 @@ const userSlice = createSlice({
         state.Mobile = data?.mobile || '';
         state.Email = data?.email || '';
         state.employeeMasterAutoId = data?.empId || null;
-        state.globelAssigndRolesAndUnits = data.globelAssigndRolesAndUnits;
-
+        state.globelAssigndRolesAndUnits = data.dmsRoles;
         const roles = data?.dmsRoles?.map((r: any) => r.roleAssign) || [];
-        
-        state.Roles = [...new Set([...roles, 'user'])];
-        state.roleAssigned = data?.globelAssigndRolesAndUnits || [];
-        const approvalDepartments = data?.dmsRoles?.find((ele) => ele?.roleAssign === 'Contractual Employee Approver');
-        state.departmentList = approvalDepartments?.units[0]?.departments?.map((ele) => ele?.departmentName?.toLowerCase());
-
         state.Roles = [...new Set([...roles, 'user'])];
         state.roleAssigned = data?.dmsRoles || [];
-
+        const approvalDepartments = data?.dmsRoles?.find((ele) => ele?.roleAssign === 'Contractual Employee Approver');
+        state.departmentList = approvalDepartments?.units[0]?.departments?.map((ele) => ele?.departmentName?.toLowerCase());
+        state.Roles = [...new Set([...roles, 'user'])];
+        state.roleAssigned = data?.dmsRoles || [];
         state.isDelegatedUser = data?.isDelegatedUser ?? false;
         state.delegateeEmpCode = data?.delegateeEmpCode ?? null;
         state.delegatedApplications = data?.delegatedApplications ?? null;

@@ -70,7 +70,7 @@ const EmployeeApproval: React.FC = () => {
   const userInfo = useAppSelector((state: RootState) => state.user);
   // --- Store ---
   const { data: employeeApprovalData, loading: employeeApprovalLoading } = useAppSelector((state: RootState) => state.fetchEmployeeApproval);
-  const { data: ProfileChangeRequests, loading: ProfileChangeRequestsLoading } = useAppSelector(  (state: RootState) => state.contractProfileChangeRequest);
+  const { data: ProfileChangeRequests, loading: ProfileChangeRequestsLoading } = useAppSelector((state: RootState) => state.contractProfileChangeRequest);
 
   const { data: ReportingAuthorityRequests, loading: ReportingAuthorityRequestsLoading } = useAppSelector(
     (state: RootState) => state.fetchContractReportingAuthorityRequests
@@ -79,43 +79,42 @@ const EmployeeApproval: React.FC = () => {
   const dispatch = useAppDispatch();
   console.log(departmentList, 'departmentList');
   const unitOptions = useMemo(() => {
-    if (unitList?.length === 0) return [];
-    // If SuperAdmin, show all units from masterData
+    if (unitList.length === 0) return [];
+
+    // SuperAdmin → all units
     if (Roles.includes('SuperAdmin')) {
-      return unitList?.map((unit) => ({
+      return unitList.map((unit) => ({
         label: unit.name,
         value: unit.id,
       }));
     }
 
-    // For regular users, use globelAssigndRolesAndUnits
-    if (globelAssigndRolesAndUnits?.length > 0) {
-      // Extract units from globelAssigndRolesAndUnits
-      const assignedUnits = globelAssigndRolesAndUnits?.flatMap((item) =>
-        item?.units?.map((unit) => ({
-          label: unit.unitName,
-          value: unit.unitId,
-        }))
-      );
+    if (globelAssigndRolesAndUnits.length > 0) {
+      const unitMap = new Map<number, { label: string; value: number }>();
 
-      // Validate against masterData
-      const validatedUnits = assignedUnits
-        .map((assignedUnit) => {
-          // Find matching unit in masterData
-          const masterUnit = unitList.find((mu) => Number(mu.id) === Number(assignedUnit.value));
+      globelAssigndRolesAndUnits.forEach((item) => {
+        item.units.forEach((unit) => {
+          const unitId = Number(unit.unitId);
 
-          if (masterUnit) {
-            return assignedUnit;
+          // validate against master list
+          const exists = unitList.some((mu) => Number(mu.id) === unitId);
+          if (!exists) return;
+
+          // dedupe
+          if (!unitMap.has(unitId)) {
+            unitMap.set(unitId, {
+              label: unit.unitName,
+              value: unitId,
+            });
           }
-          return null; // Unit not found in masterData
-        })
-        .filter(Boolean); // Remove null values (units not in masterData)
+        });
+      });
 
-      return validatedUnits;
+      return Array.from(unitMap.values());
     }
+
     return [];
   }, [Roles, globelAssigndRolesAndUnits, unitList]);
-
   // Set default selected unit as first option
   const [selectedUnit, setSelectedUnit] = useState(unitOptions.length > 0 ? unitOptions[0] : { value: userInfo.unitId, label: userInfo.Unit });
   // --- Fetch per active tab ---
@@ -343,31 +342,33 @@ const EmployeeApproval: React.FC = () => {
       ),
     },
   ];
-  const employeeApprovalRows = useMemo(() => {
-    if (Number(selectedUnit?.value) === 1 || Number(selectedUnit?.value) === 396) {
-      return employeeApprovalData?.filter((ele) => departmentList?.includes(ele?.deptDFCCIL?.toLowerCase()));
-    }
-    return employeeApprovalData || [];
-  }, [selectedUnit, departmentList, employeeApprovalData]);
-  const ProfileChangeRequestsFiltered = useMemo(() => {
-    if (Number(selectedUnit?.value) === 1 || Number(selectedUnit?.value) === 396) {
-      return ProfileChangeRequests?.filter((ele) => departmentList?.includes(ele?.oldRecored?.department?.toLowerCase()));
-    }
-    return ProfileChangeRequests || [];
-  }, [selectedUnit, departmentList, ProfileChangeRequests]);
-  const ReportingAuthorityRequestsFiltered = useMemo(() => {
-    if (Number(selectedUnit?.value) === 1 || Number(selectedUnit?.value) === 396) {
-      return ReportingAuthorityRequests?.filter((ele) => departmentList?.includes(ele?.oldRecored?.department?.toLowerCase()));
-    }
-    return ReportingAuthorityRequests || [];
-  }, [selectedUnit, departmentList, ReportingAuthorityRequests]);
-  const employeeApprovalRowsFiltered = useMemo(() => {
-    if (Number(selectedUnit?.value) === 1 || Number(selectedUnit?.value) === 396) {
-      return employeeApprovalRows?.filter((ele) => departmentList?.includes(ele.deptDFCCIL?.toLowerCase()));
-    }
-    return employeeApprovalRows || [];
-  }, [selectedUnit, departmentList, employeeApprovalRows]);
+  const isRestrictedUser = !Roles.includes('SuperAdmin');
+  const isSpecialUnit = [1, 396].includes(Number(selectedUnit?.value));
 
+  const shouldApplyDeptFilter = isRestrictedUser && isSpecialUnit;
+
+  // make data optional + default to []
+  const filterByDept = <T,>(data: T[] | undefined, getDept: (item: T) => string | undefined): T[] => {
+    if (!shouldApplyDeptFilter) return data ?? [];
+
+    return (data ?? []).filter((item) => departmentList?.includes(getDept(item)?.toLowerCase() || ''));
+  };
+  const employeeApprovalRows = useMemo(() => {
+    return filterByDept(employeeApprovalData, (ele) => ele?.deptDFCCIL);
+  }, [employeeApprovalData, shouldApplyDeptFilter, departmentList]);
+
+  const ProfileChangeRequestsFiltered = useMemo(() => {
+    return filterByDept(ProfileChangeRequests, (ele) => ele?.oldRecored?.department);
+  }, [ProfileChangeRequests, shouldApplyDeptFilter, departmentList]);
+
+  const ReportingAuthorityRequestsFiltered = useMemo(() => {
+    return filterByDept(ReportingAuthorityRequests, (ele) => ele?.oldRecored?.department);
+  }, [ReportingAuthorityRequests, shouldApplyDeptFilter, departmentList]);
+
+  // ⚠️ avoid double filtering if not needed
+  const employeeApprovalRowsFiltered = useMemo(() => {
+    return filterByDept(employeeApprovalRows, (ele) => ele?.deptDFCCIL);
+  }, [employeeApprovalRows, shouldApplyDeptFilter, departmentList]);
   // Loading flags per tab for refresh buttons
   const isLoadingMap: Record<TabKey, boolean> = {
     new: employeeApprovalLoading,
@@ -428,7 +429,7 @@ const EmployeeApproval: React.FC = () => {
                 ),
               },
             ]}
-            data={employeeApprovalRows||[]}
+            data={employeeApprovalRows || []}
             showSearchInput
             inputPlaceholder="Search registration requests..."
             rightElements={
@@ -443,7 +444,7 @@ const EmployeeApproval: React.FC = () => {
         <TabsContent value="personal-profile" className="mt-4 sm:mt-6">
           <TableList
             showItemPerPage={20}
-            data={ProfileChangeRequestsFiltered||[]}
+            data={ProfileChangeRequestsFiltered || []}
             columns={profileColumns}
             showSearchInput
             inputPlaceholder="Search personal profile requests..."
