@@ -13,6 +13,7 @@ import { ContractorModal } from '@/components/dialogs/ContractorModal';
 
 const ManageContractor = () => {
   const [contracts, setContracts] = useState([]);
+  const [Existingcontractors, setExistingContractors] = useState([]);
   const userDetails = useAppSelector((state: RootState) => state.user);
   const [showModal, setShowModal] = useState(false);
   const [mode, setMode] = useState<'add' | 'edit'>('add');
@@ -72,7 +73,7 @@ const ManageContractor = () => {
   const fetchContractorsData = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get('/ContractManagement/get-contractors');
+      const response = await axiosInstance.get('/ContractManagement/get-contractorsV2');
       setContracts(response.data.data);
     } catch (error) {
       console.log(error);
@@ -80,9 +81,30 @@ const ManageContractor = () => {
       setLoading(false);
     }
   };
+
+  const fetchExistingContractors = async () => {
+    try {
+      setLoading(true);
+      const response = await axiosInstance.get('/ContractManagement/get-contractor-master');
+      setExistingContractors(response.data.data);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchContractorsData();
+    fetchExistingContractors();
   }, []);
+
+  const contractorOptions = useMemo(() => {
+    return Existingcontractors.map((c) => ({
+      label: c.contractor,
+      value: c.contractor,
+    }));
+  }, [Existingcontractors]);
 
   const handleSaveContract = async (formData) => {
     try {
@@ -123,11 +145,29 @@ const ManageContractor = () => {
     }
   };
 
-  const filteredContractors = useMemo(() => {
-    if (isSuperAdmin) return contracts;
+  const tableData = useMemo(() => {
+    const result = [];
 
-    return contracts.filter((c) => c.mappings?.[0]?.unitName === userDetails.Unit);
-  }, [contracts, userDetails]);
+    contracts.forEach((contractor) => {
+      contractor.units?.forEach((unit) => {
+        result.push({
+          contractor: contractor.contractor,
+          contractorId: contractor.contractorId,
+          unitName: unit.unitName,
+          unitId: unit.unitId,
+          departments: unit.departments || [],
+        });
+      });
+    });
+
+    return result;
+  }, [contracts]);
+
+  const filteredTableData = useMemo(() => {
+    if (isSuperAdmin) return tableData;
+
+    return tableData.filter((row) => row.unitName === userDetails.Unit);
+  }, [tableData, userDetails]);
 
   const columns = [
     {
@@ -141,14 +181,14 @@ const ManageContractor = () => {
       cell: ({ row }) => <div className="px-2 py-3 font-semibold">{row.original.contractor.toUpperCase()}</div>,
     },
     {
-      accessorKey: 'unit',
+      accessorKey: 'unitName',
       header: 'Unit',
-      cell: ({ row }) => <div className="px-2 py-3 font-semibold">{row.original.mappings?.[0]?.unitName.toUpperCase() || '-'}</div>,
+      cell: ({ row }) => <div className="px-2 py-3 font-semibold">{row.original.unitName?.toUpperCase() || '-'}</div>,
     },
     {
-      accessorKey: 'department',
+      accessorKey: 'departments',
       header: 'Departments',
-      cell: ({ row }) => <div className="px-2 py-3 font-semibold">{row.original.mappings?.map((m) => m.departmentName).join(' , ') || '-'}</div>,
+      cell: ({ row }) => <div className="px-2 py-3 font-semibold">{row.original.departments?.map((d) => d.departmentName).join(', ') || '-'}</div>,
     },
     {
       accessorKey: 'action',
@@ -249,7 +289,7 @@ const ManageContractor = () => {
             </div>
             <TableList
               columns={columns}
-              data={filteredContractors}
+              data={filteredTableData}
               showSearchInput
               showRefresh
               onRefresh={() => fetchContractorsData()}
@@ -280,6 +320,7 @@ const ManageContractor = () => {
         initialData={selectedRow}
         units={unitOptions}
         departments={departmentOptions}
+        contractorOptions={contractorOptions} 
         onSave={handleSaveContract}
       />
     </div>
