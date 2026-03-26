@@ -82,6 +82,8 @@ const ManageContractor = () => {
     }
   };
 
+  console.log(contracts);
+
   const fetchExistingContractors = async () => {
     try {
       setLoading(true);
@@ -271,12 +273,8 @@ const ManageContractor = () => {
 
                   setSelectedRow({
                     contractor: '',
-                    mappings: [
-                      {
-                        unitId: userUnit?.value ?? null,
-                        departmentId: null,
-                      },
-                    ],
+                    unitId: userUnit?.value ?? null,
+                    departments: [],
                   });
 
                   setShowModal(true);
@@ -320,7 +318,7 @@ const ManageContractor = () => {
         initialData={selectedRow}
         units={unitOptions}
         departments={departmentOptions}
-        contractorOptions={contractorOptions} 
+        contractorOptions={contractorOptions}
         onSave={handleSaveContract}
       />
     </div>
