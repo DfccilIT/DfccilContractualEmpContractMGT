@@ -16,10 +16,11 @@ import { useAppName } from '@/hooks/useAppName';
 import { useAuth } from 'react-oidc-context';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchMasterData } from '@/features/masterData/masterSlice';
-import ManageContract from '@/pages/user/ManageContract';
 import CreateContract from '@/pages/user/CreateContract';
-import EmployeeContractsMapping from '@/pages/user/EmployeeContractsMapping';
+// import EmployeeContractsMapping from '@/pages/user/EmployeeContractsMapping';
 import EmployeeApproval from '@/pages/admin/EmployeeApproval';
+import ContractHistory from '@/pages/user/ContractHistory';
+import ManageContractor from '@/pages/user/ManageContractor';
 
 const AppRoutes = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -46,16 +47,17 @@ const AppRoutes = () => {
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/logout-notification" element={<FrontChannelLogout />} />
         <Route element={<AppLayout isAdmin={false} />}>
-          <Route element={<PrivateRoute allowedRoles={['SuperAdmin', 'HR']} />}>
+          <Route element={<PrivateRoute allowedRoles={['SuperAdmin', 'Contract Manager', 'Contractual Employee Approver']} />}>
             <Route path="/" element={<HomePage />} />
-            <Route path="/transfer-request" element={<ManageContract />} />
+            <Route path="/manage-contractor" element={<ManageContractor />} />
             <Route path="/manage-contract" element={<CreateContract />} />
             <Route path="/contratual" element={<EmployeeApproval />} />
-            <Route path="/employee-contract-mapping" element={<EmployeeContractsMapping />} />
+            {/* <Route path="/employee-contract-mapping" element={<EmployeeContractsMapping />} /> */}
+            <Route path="/archived-contract" element={<ContractHistory />} />
           </Route>
         </Route>
         <Route element={<AppLayout isAdmin={true} />}>
-          <Route element={<PrivateRoute allowedRoles={['SuperAdmin', 'HR']} />}>
+          <Route element={<PrivateRoute allowedRoles={['SuperAdmin', 'Contract Manager', 'Contractual Employee Approver']} />}>
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
           </Route>
         </Route>

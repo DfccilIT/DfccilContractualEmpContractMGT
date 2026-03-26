@@ -50,7 +50,11 @@ interface ProfileApiResponse {
     unit: string;
     unitId: number;
     level: string;
-    dmsRoles: any[];
+    dmsRoles: {
+      roleAssign: string;
+      units: any[];
+      departments: any[];
+    }[];
     globelAssigndRolesAndUnits: {
       roleAssign: string;
       units: any[];
@@ -86,7 +90,7 @@ const initialState: UserState = {
 
 export const fetchUserProfile = createAsyncThunk('user/fetchProfile', async (_, { rejectWithValue }) => {
   try {
-    const response = await axiosInstance.get<ProfileApiResponse>('/Account/profile');
+    const response = await axiosInstance.get<ProfileApiResponse>('/Account/V2/profile');
 
     if (response.data.statusCode !== 200) {
       throw new Error(response.data.message);
@@ -145,6 +149,10 @@ const userSlice = createSlice({
         state.roleAssigned = data?.globelAssigndRolesAndUnits || [];
         const approvalDepartments = data?.dmsRoles?.find((ele) => ele?.roleAssign === 'Contractual Employee Approver');
         state.departmentList = approvalDepartments?.units[0]?.departments?.map((ele) => ele?.toLowerCase());
+
+        state.Roles = [...new Set([...roles, 'user'])];
+        state.roleAssigned = data?.dmsRoles || [];
+
         state.isDelegatedUser = data?.isDelegatedUser ?? false;
         state.delegateeEmpCode = data?.delegateeEmpCode ?? null;
         state.delegatedApplications = data?.delegatedApplications ?? null;

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Edit, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useAppSelector } from '@/app/hooks';
 import { RootState } from '@/app/store';
 import axiosInstance from '@/services/axiosInstance';
@@ -9,51 +9,65 @@ import ConfirmDialog from '@/components/common/ConfirmDialog';
 import Loader from '@/components/ui/loader';
 import TableList from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
-import { ContractModal } from '@/components/dialogs/ContractModal';
+import { ContractorModal } from '@/components/dialogs/ContractorModal';
 
-const ManageContract = () => {
+const ManageContractor = () => {
   const [contracts, setContracts] = useState([]);
   const userDetails = useAppSelector((state: RootState) => state.user);
-  // const { unit, departments } = useAppSelector((state: RootState) => state.masterData.data);
   const [showModal, setShowModal] = useState(false);
   const [mode, setMode] = useState<'add' | 'edit'>('add');
   const [selectedRow, setSelectedRow] = React.useState(null);
   const [loading, setLoading] = useState(false);
-  const [units, setUnits] = useState([]);
-  const [departments, setDepartments] = useState([]);
+  const [selectedUnit, setSelectedUnit] = useState('');
 
-  const fetchStaticData = async () => {
-    try {
-      setLoading(true);
-      const response = await axiosInstance.get('/ContractManagement/get-static-data');
-      setUnits(response.data.data.unit);
-      setDepartments(response.data.data.departments);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  useEffect(() => {
-    fetchStaticData();
-  }, []);
+  const allowedRoles = ['SuperAdmin', 'Contract Manager'];
+  const isSuperAdmin = userDetails?.Roles?.includes('SuperAdmin');
+  // const isContractManager = userDetails?.Roles?.includes('Contract Manager');
 
   const unitOptions = useMemo(() => {
-    if (userDetails.Roles.includes('SuperAdmin')) {
-      return units?.map((u) => ({
-        value: u.unitid,
-        label: u.unitName,
-      }));
-    }
-    return units
-      ?.filter((u) => u.unitName === userDetails.Unit)
-      ?.map((u) => ({
-        value: u.unitid,
-        label: u.unitName,
-      }));
-  }, [units, userDetails]);
+    const map = new Map();
 
-  const departmentOptions = useMemo(() => departments?.map((d) => ({ value: d.departmentid, label: d.department })), [departments]);
+    userDetails?.roleAssigned
+      ?.filter((role) => allowedRoles.includes(role.roleAssign))
+      ?.forEach((role) => {
+        role.units?.forEach((u) => {
+          map.set(u.mstUnitId, {
+            value: u.mstUnitId,
+            label: u.unitName,
+          });
+        });
+      });
+
+    return Array.from(map.values());
+  }, [userDetails]);
+
+  const departmentOptions = useMemo(() => {
+    if (isSuperAdmin) {
+      return (
+        userDetails?.roleAssigned?.[0]?.units?.[0]?.departments?.map((d) => ({
+          value: d.departmentId,
+          label: d.departmentName,
+        })) || []
+      );
+    }
+
+    const map = new Map();
+
+    userDetails?.roleAssigned
+      ?.filter((role) => allowedRoles.includes(role.roleAssign))
+      ?.forEach((role) => {
+        role.units?.forEach((u) => {
+          u.departments?.forEach((d) => {
+            map.set(d.departmentId, {
+              value: d.departmentId,
+              label: d.departmentName,
+            });
+          });
+        });
+      });
+
+    return Array.from(map.values());
+  }, [userDetails]);
 
   const fetchContractorsData = async () => {
     try {
@@ -73,7 +87,6 @@ const ManageContract = () => {
   const handleSaveContract = async (formData) => {
     try {
       setLoading(true);
-
       const payload = {
         contractor: formData.contractorName,
         mappings: formData.departments.map((deptId) => ({
@@ -81,9 +94,7 @@ const ManageContract = () => {
           fkDepartmentId: Number(deptId),
         })),
       };
-
       let response;
-
       if (mode === 'edit') {
         response = await axiosInstance.put(`/ContractManagement/update-contractor/${selectedRow.contractorId}`, payload);
       } else {
@@ -93,7 +104,7 @@ const ManageContract = () => {
       if (response.data.statusCode === 200) {
         showCustomToast({
           title: 'Success',
-          message: mode === 'edit' ? 'Contract updated successfully' : 'Contract created successfully',
+          message: mode === 'edit' ? 'Contract updated successfully' : 'Contract added successfully',
           type: 'success',
         });
 
@@ -104,19 +115,16 @@ const ManageContract = () => {
     } catch (error) {
       showCustomToast({
         title: 'Error',
-        message: 'Operation failed',
+        message: error?.response?.data?.message || 'Something went wrong',
         type: 'error',
       });
     } finally {
       setLoading(false);
     }
   };
-  const filteredContracts = useMemo(() => {
-    if (!userDetails.unitId) return contracts;
 
-    if (userDetails.Roles.includes('SuperAdmin')) {
-      return contracts;
-    }
+  const filteredContractors = useMemo(() => {
+    if (isSuperAdmin) return contracts;
 
     return contracts.filter((c) => c.mappings?.[0]?.unitName === userDetails.Unit);
   }, [contracts, userDetails]);
@@ -163,14 +171,16 @@ const ManageContract = () => {
           </Button>
 
           {/* Delete Button */}
-          <ConfirmDialog
-            triggerClassName="h-8 w-8 p-0 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100"
-            triggerLabel=""
-            onConfirm={() => handleDelete(row.original.contractorId)}
-            icon={<Trash2 size={16} />}
-            title="Delete Contract"
-            description="Are you sure you want to delete this contract? This action cannot be undone."
-          />
+          {isSuperAdmin && (
+            <ConfirmDialog
+              triggerClassName="h-8 w-8 p-0 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100"
+              triggerLabel=""
+              onConfirm={() => handleDelete(row.original.contractorId)}
+              icon={<Trash2 size={16} />}
+              title="Deactivate Contractor"
+              description="Are you sure you want to deactivate this contractor? This action cannot be undone."
+            />
+          )}
         </div>
       ),
     },
@@ -189,10 +199,10 @@ const ManageContract = () => {
         setShowModal(false);
         fetchContractorsData();
       }
-    } catch (err) {
+    } catch (error) {
       showCustomToast({
         title: 'Error',
-        message: 'Failed to delete contract',
+        message: error?.response?.data?.message || 'Something went wrong',
         type: 'error',
       });
     } finally {
@@ -207,7 +217,7 @@ const ManageContract = () => {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold">Manage Contractors</h1>
-            <p className="text-gray-600 mt-1">Add, modify, or deactivate contractor mappings for organizational units and departments.</p>
+            <p className="text-gray-600 mt-1">Add, modify, or delete contractor mappings for organizational units and departments.</p>
           </div>
         </div>
         <Card className="border-0 shadow-md">
@@ -215,13 +225,15 @@ const ManageContract = () => {
             <div className="flex">
               <Button
                 onClick={() => {
-                  const userUnit = units.find((u) => u.unitName === userDetails.Unit);
+                  const userUnit = unitOptions.find((u) => u.label === userDetails.Unit) || unitOptions[0];
+
                   setMode('add');
+
                   setSelectedRow({
                     contractor: '',
                     mappings: [
                       {
-                        unitId: userUnit?.unitid || null,
+                        unitId: userUnit?.value ?? null,
                         departmentId: null,
                       },
                     ],
@@ -235,11 +247,33 @@ const ManageContract = () => {
                 Add Contractor
               </Button>
             </div>
-            <TableList columns={columns} data={filteredContracts} showSearchInput showRefresh onRefresh={() => fetchContractorsData() } />
+            <TableList
+              columns={columns}
+              data={filteredContractors}
+              showSearchInput
+              showRefresh
+              onRefresh={() => fetchContractorsData()}
+              // rightElements={
+              //   <>
+              //     {unitOptions.length > 1 && (
+              //       <div className="mb-4 mt-5 w-64">
+              //         <select value={selectedUnit} onChange={(e) => setSelectedUnit(e.target.value)} className="w-full border rounded-md p-2">
+              //           <option value="">All Units</option>
+              //           {unitOptions.map((u) => (
+              //             <option key={u.value} value={u.label}>
+              //               {u.label}
+              //             </option>
+              //           ))}
+              //         </select>
+              //       </div>
+              //     )}
+              //   </>
+              // }
+            />
           </CardContent>
         </Card>
       </div>
-      <ContractModal
+      <ContractorModal
         open={showModal}
         onOpenChange={setShowModal}
         mode={mode}
@@ -252,4 +286,4 @@ const ManageContract = () => {
   );
 };
 
-export default ManageContract;
+export default ManageContractor;

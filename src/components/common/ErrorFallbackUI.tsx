@@ -12,7 +12,7 @@ const ErrorFallbackUI = () => {
   };
 
   const handleGoHome = () => {
-    window.location.href = 'transfer-request';
+    window.location.href = '/manage-contractor';
   };
 
   return (

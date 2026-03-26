@@ -7,7 +7,7 @@ const Unauthorized: React.FC = () => {
   const navigate = useNavigate();
 
   const handleGoBack = () => {
-    navigate('/transfer-request');
+    navigate('/manage-contractor');
   };
 
   return (

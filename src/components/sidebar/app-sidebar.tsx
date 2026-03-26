@@ -12,6 +12,7 @@ import {
   SquarePen,
   SquareUserRound,
   User2,
+  History,
 } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { NavMain } from '@/components/nav-main';
@@ -29,22 +30,22 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const canAccessAdminDashboard = true;
   const allNavItems: NavItem[] = [
     {
-      title: 'Manage Contractor',
-      url: '/transfer-request',
+      title: 'Manage Contractors',
+      url: '/manage-contractor',
       icon: SquareUserRound,
-      roles: ['SuperAdmin', 'HR'],
+      roles: ['SuperAdmin', 'Contract Manager' , 'Contractual Employee Approver'],
     },
     {
-      title: 'Manage Contract',
+      title: 'Manage Contracts',
       url: '/manage-contract',
       icon: SquarePen,
-      roles: ['SuperAdmin', 'HR'],
+      roles: ['SuperAdmin', 'Contract Manager' , 'Contractual Employee Approver'],
     },
     {
-      title: 'Employee Mapping',
-      url: '/employee-contract-mapping',
-      icon: User2,
-      roles: ['SuperAdmin', 'HR'],
+      title: 'Archived Contracts',
+      url: '/archived-contract',
+      icon: History,
+      roles: ['SuperAdmin', 'Contract Manager' , 'Contractual Employee Approver'],
     },
     {
       title: 'Contratual',
