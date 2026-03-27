@@ -176,6 +176,7 @@ export function ContractorModal({
               <Input
                 className="mt-1"
                 value={form.contractorName}
+                readOnly
                 onChange={(e) =>
                   setForm((prev) => ({
                     ...prev,
@@ -222,6 +223,7 @@ export function ContractorModal({
                 }
                 placeholder="Select Unit"
                 isClearable
+                isDisabled={isEdit}
                 styles={customSelectStyles}
               />
             </div>

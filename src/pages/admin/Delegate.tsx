@@ -323,9 +323,9 @@ const Delegate = () => {
       <div className="w-full">
         <div className="w-full overflow-x-auto">
           <div className="min-w-full">
-            {loading ? (
+            {/* {loading ? (
               <Loader />
-            ) : (
+            ) : ( */}
               <div>
                 <div className="flex items-center">
                   <div className="w-full mb-4">
@@ -343,13 +343,13 @@ const Delegate = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  <Button>
+                  <Button onClick={() => dispatch(fetchEmpRoleList())}>
                     <RefreshCcw />
                   </Button>
                 </div>
                 <TableList columns={columns} data={filteredTableData} />
               </div>
-            )}
+            {/* )} */}
           </div>
         </div>
       </div>
