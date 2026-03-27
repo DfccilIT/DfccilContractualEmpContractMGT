@@ -37,7 +37,16 @@ type ContractModalProps = {
   contractorOptions?: Option[];
 };
 
-export function ContractorModal({ open, onOpenChange, mode = 'add', initialData, onSave, units = [], departments = [] , contractorOptions = []}: ContractModalProps) {
+export function ContractorModal({
+  open,
+  onOpenChange,
+  mode = 'add',
+  initialData,
+  onSave,
+  units = [],
+  departments = [],
+  contractorOptions = [],
+}: ContractModalProps) {
   const empty = {
     contractorName: '',
     unit: '',
@@ -163,31 +172,39 @@ export function ContractorModal({ open, onOpenChange, mode = 'add', initialData,
           {/* Contractor Name */}
           <div className="w-1/2">
             <p className="text-sm font-medium">Contractor Name</p>
-            {/* <Input
-              className="mt-1"
-              value={form.contractorName}
-              onChange={(e) => setForm((p) => ({ ...p, contractorName: e.target.value }))}
-              placeholder="Enter Contractor Name"
-            /> */}
-            <CreatableSelect
-              options={contractorOptions}
-              value={form.contractorName ? { label: form.contractorName, value: form.contractorName } : null}
-              onChange={(selected) => {
-                setForm((prev) => ({
-                  ...prev,
-                  contractorName: selected ? selected.value : '',
-                }));
-              }}
-              onCreateOption={(inputValue) => {
-                setForm((prev) => ({
-                  ...prev,
-                  contractorName: inputValue,
-                }));
-              }}
-              placeholder="Select or type contractor"
-              isClearable
-              styles={customSelectStyles}
-            />
+            {isEdit ? (
+              <Input
+                className="mt-1"
+                value={form.contractorName}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    contractorName: e.target.value,
+                  }))
+                }
+                placeholder="Enter Contractor Name"
+              />
+            ) : (
+              <CreatableSelect
+                options={contractorOptions}
+                value={form.contractorName ? { label: form.contractorName, value: form.contractorName } : null}
+                onChange={(selected) => {
+                  setForm((prev) => ({
+                    ...prev,
+                    contractorName: selected ? selected.value : '',
+                  }));
+                }}
+                onCreateOption={(inputValue) => {
+                  setForm((prev) => ({
+                    ...prev,
+                    contractorName: inputValue,
+                  }));
+                }}
+                placeholder="Select or type contractor"
+                isClearable
+                styles={customSelectStyles}
+              />
+            )}
             <ErrorLine msg={errors.contractorName} />
           </div>
           {/* Units */}

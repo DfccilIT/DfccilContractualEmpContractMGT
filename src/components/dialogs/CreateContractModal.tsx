@@ -5,6 +5,8 @@ import { AlertCircle } from 'lucide-react';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import axiosInstance from '@/services/axiosInstance';
+import { useAppSelector } from '@/app/hooks';
+import { RootState } from '@/app/store';
 
 export const CreateContractDialog = ({
   open,
@@ -34,6 +36,8 @@ export const CreateContractDialog = ({
   const [limitErrorOpen, setLimitErrorOpen] = useState(false);
   const [limitErrorMsg, setLimitErrorMsg] = useState('');
   const [employeeSearch, setEmployeeSearch] = useState('');
+  const userDetails = useAppSelector((state: RootState) => state.user);
+  const allowedRoles = ['SuperAdmin', 'Contract Manager', 'Contractual Employee Approver'];
 
   useEffect(() => {
     if (!open) return;
@@ -170,26 +174,57 @@ export const CreateContractDialog = ({
 
   const filteredDepartments = useMemo(() => {
     if (!formData.contractor || !formData.unit || !Contractors?.length) return [];
+
     const contractor = Contractors.find((c) => c.contractorId === formData.contractor?.value);
+
+    const userDepartments = new Set();
+
+    userDetails?.roleAssigned?.forEach((role) => {
+      if (!allowedRoles.includes(role.roleAssign)) return;
+
+      role.units?.forEach((u) => {
+        if (u.unitName === formData.unit.label) {
+          u.departments?.forEach((d) => {
+            userDepartments.add(d.departmentName);
+          });
+        }
+      });
+    });
 
     return (
       contractor?.mappings
-        ?.filter((m) => Number(m.unitId) === Number(formData.unit.value))
+        ?.filter((m) => Number(m.unitId) === Number(formData.unit.value) && userDepartments.has(m.departmentName))
         ?.map((m) => ({
           label: m.departmentName,
           value: m.departmentId,
         })) || []
     );
-  }, [formData.contractor, formData.unit, Contractors]);
+  }, [formData.contractor, formData.unit, Contractors, userDetails]);
 
   const filteredContractors = useMemo(() => {
     if (!formData.unit || !Contractors?.length) return [];
 
-    return Contractors?.filter((c) => c.mappings?.some((m) => Number(m.unitId) === Number(formData.unit.value)))?.map((c) => ({
-      label: c.contractor,
-      value: c.contractorId,
-    }));
-  }, [Contractors, formData.unit]);
+    const userDepartments = new Set();
+
+    userDetails?.roleAssigned?.forEach((role) => {
+      if (!allowedRoles.includes(role.roleAssign)) return;
+
+      role.units?.forEach((u) => {
+        if (u.unitName === formData.unit.label) {
+          u.departments?.forEach((d) => {
+            userDepartments.add(d.departmentName);
+          });
+        }
+      });
+    });
+
+    return Contractors?.filter((c) => c.mappings?.some((m) => Number(m.unitId) === Number(formData.unit.value) && userDepartments.has(m.departmentName)))?.map(
+      (c) => ({
+        label: c.contractor,
+        value: c.contractorId,
+      })
+    );
+  }, [Contractors, formData.unit, userDetails]);
 
   const fetchMappingId = async () => {
     try {
