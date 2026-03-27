@@ -1,7 +1,14 @@
 import { getDelegationInfoFromSession } from '@/lib/helperFunction';
 import axiosInstance from '@/services/axiosInstance';
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
-
+interface Unit {
+  unitId: number;
+  unitName: string;
+}
+interface GlobelAssigndRoleAndUnit {
+  roleAssign: string;
+  units: Unit[];
+}
 export interface UserState {
   Roles: string[];
   name: string | null;
@@ -20,11 +27,13 @@ export interface UserState {
   roleAssigned: any[];
   loading: boolean;
   error: string | null;
-
   isDelegatedUser?: boolean;
   delegateeEmpCode?: string | null;
   delegatedApplications?: string | null;
   delegatedApplicationNames?: string | null;
+  departmentList?: string[];
+  GGMDepartments?: string[];
+  globelAssigndRolesAndUnits: GlobelAssigndRoleAndUnit[];
 }
 
 interface ProfileApiResponse {
@@ -75,6 +84,9 @@ const initialState: UserState = {
   delegateeEmpCode: null,
   delegatedApplications: null,
   delegatedApplicationNames: null,
+  departmentList: [],
+  GGMDepartments: [],
+  globelAssigndRolesAndUnits: [],
 };
 
 export const fetchUserProfile = createAsyncThunk('user/fetchProfile', async (_, { rejectWithValue }) => {
@@ -130,12 +142,15 @@ const userSlice = createSlice({
         state.Mobile = data?.mobile || '';
         state.Email = data?.email || '';
         state.employeeMasterAutoId = data?.empId || null;
-
+        state.globelAssigndRolesAndUnits = data.dmsRoles;
         const roles = data?.dmsRoles?.map((r: any) => r.roleAssign) || [];
-
         state.Roles = [...new Set([...roles, 'user'])];
         state.roleAssigned = data?.dmsRoles || [];
-
+        const approvalDepartments = data?.dmsRoles?.find((ele) => ele?.roleAssign === 'Contractual Employee Approver');
+        const GGMDepartments = data?.dmsRoles?.find((ele) => ele?.roleAssign === 'GGM' || ele.roleAssign === 'CGM');
+        state.departmentList = approvalDepartments?.units[0]?.departments?.map((ele) => ele?.departmentName?.toLowerCase());
+        state.GGMDepartments = GGMDepartments?.units[0]?.departments?.map((ele) => ele?.departmentName?.toLowerCase());
+        state.Roles = [...new Set([...roles, 'user'])];
         state.isDelegatedUser = data?.isDelegatedUser ?? false;
         state.delegateeEmpCode = data?.delegateeEmpCode ?? null;
         state.delegatedApplications = data?.delegatedApplications ?? null;

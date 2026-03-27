@@ -17,8 +17,11 @@ import { useAuth } from 'react-oidc-context';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchMasterData } from '@/features/masterData/masterSlice';
 import CreateContract from '@/pages/user/CreateContract';
+import EmployeeApproval from '@/pages/admin/EmployeeApproval';
 import ContractHistory from '@/pages/user/ContractHistory';
 import ManageContractor from '@/pages/user/ManageContractor';
+import Delegate from '@/pages/admin/Delegate';
+import { fetchEmployeesList } from '@/features/employee/employeeSlice';
 
 const AppRoutes = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -29,6 +32,7 @@ const AppRoutes = () => {
   useEffect(() => {
     if (isAuthenticated && masterData?.employees?.length === 0) {
       dispatch(fetchMasterData());
+      dispatch(fetchEmployeesList());
     }
   }, [masterData.employees, isAuthenticated]);
   useGlobalLogout();
@@ -45,15 +49,21 @@ const AppRoutes = () => {
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/logout-notification" element={<FrontChannelLogout />} />
         <Route element={<AppLayout isAdmin={false} />}>
-          <Route element={<PrivateRoute allowedRoles={['SuperAdmin', 'Contract Manager' , 'Contractual Employee Approver']} />}>
+          <Route element={<PrivateRoute allowedRoles={['user']} />}>
             <Route path="/" element={<HomePage />} />
+          </Route>
+          <Route element={<PrivateRoute allowedRoles={['SuperAdmin', 'Contract Manager', 'Contractual Employee Approver']} />}>
             <Route path="/manage-contractor" element={<ManageContractor />} />
             <Route path="/manage-contract" element={<CreateContract />} />
+            <Route path="/contractual" element={<EmployeeApproval />} />
             <Route path="/archived-contract" element={<ContractHistory />} />
+          </Route>
+          <Route element={<PrivateRoute allowedRoles={['CGM', 'GGM', 'SuperAdmin']} />}>
+            <Route path="/employee-delegate" element={<Delegate />} />
           </Route>
         </Route>
         <Route element={<AppLayout isAdmin={true} />}>
-          <Route element={<PrivateRoute allowedRoles={['SuperAdmin', 'Contract Manager' , 'Contractual Employee Approver']} />}>
+          <Route element={<PrivateRoute allowedRoles={['SuperAdmin', 'Contract Manager', 'Contractual Employee Approver']} />}>
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
           </Route>
         </Route>

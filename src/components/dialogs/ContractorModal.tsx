@@ -2,6 +2,7 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import Select from 'react-select';
+import CreatableSelect from 'react-select/creatable';
 import ConfirmDialog from '../common/ConfirmDialog';
 
 const isEmpty = (v) => v === null || v === undefined || String(v).trim() === '';
@@ -33,9 +34,19 @@ type ContractModalProps = {
   onSave?: (data: ContractForm) => void;
   units?: Option[];
   departments?: Option[];
+  contractorOptions?: Option[];
 };
 
-export function ContractorModal({ open, onOpenChange, mode = 'add', initialData, onSave, units = [], departments = [] }: ContractModalProps) {
+export function ContractorModal({
+  open,
+  onOpenChange,
+  mode = 'add',
+  initialData,
+  onSave,
+  units = [],
+  departments = [],
+  contractorOptions = [],
+}: ContractModalProps) {
   const empty = {
     contractorName: '',
     unit: '',
@@ -50,8 +61,8 @@ export function ContractorModal({ open, onOpenChange, mode = 'add', initialData,
     if (initialData) {
       setForm({
         contractorName: initialData.contractor || '',
-        unit: String(initialData.mappings?.[0]?.unitId || ''),
-        departments: initialData.mappings?.filter((m) => m.departmentId)?.map((m) => String(m.departmentId)) || [],
+        unit: String(initialData.unitId || ''),
+        departments: initialData.departments?.filter((m) => m.departmentId)?.map((m) => String(m.departmentId)) || [],
       });
     } else {
       setForm(empty);
@@ -101,7 +112,7 @@ export function ContractorModal({ open, onOpenChange, mode = 'add', initialData,
     }),
     menuList: (provided) => ({
       ...provided,
-      maxHeight: '200px', 
+      maxHeight: '200px',
       paddingTop: 4,
       paddingBottom: 4,
     }),
@@ -161,12 +172,40 @@ export function ContractorModal({ open, onOpenChange, mode = 'add', initialData,
           {/* Contractor Name */}
           <div className="w-1/2">
             <p className="text-sm font-medium">Contractor Name</p>
-            <Input
-              className="mt-1"
-              value={form.contractorName}
-              onChange={(e) => setForm((p) => ({ ...p, contractorName: e.target.value }))}
-              placeholder="Enter Contractor Name"
-            />
+            {isEdit ? (
+              <Input
+                className="mt-1"
+                value={form.contractorName}
+                readOnly
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    contractorName: e.target.value,
+                  }))
+                }
+                placeholder="Enter Contractor Name"
+              />
+            ) : (
+              <CreatableSelect
+                options={contractorOptions}
+                value={form.contractorName ? { label: form.contractorName, value: form.contractorName } : null}
+                onChange={(selected) => {
+                  setForm((prev) => ({
+                    ...prev,
+                    contractorName: selected ? selected.value : '',
+                  }));
+                }}
+                onCreateOption={(inputValue) => {
+                  setForm((prev) => ({
+                    ...prev,
+                    contractorName: inputValue,
+                  }));
+                }}
+                placeholder="Select or type contractor"
+                isClearable
+                styles={customSelectStyles}
+              />
+            )}
             <ErrorLine msg={errors.contractorName} />
           </div>
           {/* Units */}
@@ -184,6 +223,7 @@ export function ContractorModal({ open, onOpenChange, mode = 'add', initialData,
                 }
                 placeholder="Select Unit"
                 isClearable
+                isDisabled={isEdit}
                 styles={customSelectStyles}
               />
             </div>

@@ -13,6 +13,7 @@ import {
   SquareUserRound,
   User2,
   History,
+  UserCog,
 } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { NavMain } from '@/components/nav-main';
@@ -33,19 +34,31 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
       title: 'Manage Contractors',
       url: '/manage-contractor',
       icon: SquareUserRound,
-      roles: ['SuperAdmin', 'Contract Manager' , 'Contractual Employee Approver'],
+      roles: ['SuperAdmin', 'Contract Manager', 'Contractual Employee Approver'],
     },
     {
       title: 'Manage Contracts',
       url: '/manage-contract',
       icon: SquarePen,
-      roles: ['SuperAdmin', 'Contract Manager' , 'Contractual Employee Approver'],
+      roles: ['SuperAdmin', 'Contract Manager', 'Contractual Employee Approver'],
     },
     {
       title: 'Archived Contracts',
       url: '/archived-contract',
       icon: History,
-      roles: ['SuperAdmin', 'Contract Manager' , 'Contractual Employee Approver'],
+      roles: ['SuperAdmin', 'Contract Manager', 'Contractual Employee Approver'],
+    },
+    {
+      title: 'Contractual',
+      url: '/contractual',
+      icon: User2,
+      roles: ['SuperAdmin', 'HR', 'Contract Manager', 'Contractual Employee Approver'],
+    },
+    {
+      title: 'Role Assignment',
+      icon: UserCog,
+      url: '/employee-delegate',
+      roles: ['CGM', 'SuperAdmin', 'GGM', 'GM'],
     },
   ];
   const navMainItems = allNavItems.filter((item) => item.roles.some((role) => Roles.includes(role)));
