@@ -14,7 +14,7 @@ const ContractHistory = () => {
   const [employeeSearch, setEmployeeSearch] = useState({});
   const [selectedUnit, setSelectedUnit] = useState('');
 
-  const allowedRoles = ['SuperAdmin', 'Contract Manager'];
+  const allowedRoles = ['SuperAdmin', 'Contract Manager', 'Contractual Employee Approver'];
   const isSuperAdmin = userDetails?.Roles?.includes('SuperAdmin');
 
   const unitOptions = useMemo(() => {
@@ -51,15 +51,42 @@ const ContractHistory = () => {
   }, []);
 
   const filteredContractHistory = useMemo(() => {
-    if (!userDetails.unitId) return contractHistory;
+    let data = contractHistory;
 
-    if (userDetails.Roles.includes('SuperAdmin')) {
-      if (!selectedUnit) return contractHistory;
+    if (!userDetails.unitId) return data;
 
-      return contractHistory.filter((c) => c.unit === selectedUnit);
+    if (isSuperAdmin) {
+      if (selectedUnit) {
+        data = data.filter((c) => c.unit === selectedUnit);
+      }
+      return data;
     }
 
-    return contractHistory.filter((c) => c.unit === userDetails.Unit);
+    const userDepartments = new Set();
+
+    userDetails?.roleAssigned?.forEach((role) => {
+      if (!allowedRoles.includes(role.roleAssign)) return;
+
+      role.units?.forEach((u) => {
+        if (u.unitName === userDetails.Unit) {
+          u.departments?.forEach((d) => {
+            userDepartments.add(d.departmentName);
+          });
+        }
+      });
+    });
+
+    data = data.filter((c) => {
+      if (c.unit !== userDetails.Unit) return false;
+
+      return userDepartments.has(c.department);
+    });
+
+    if (selectedUnit) {
+      data = data.filter((c) => c.unit === selectedUnit);
+    }
+
+    return data;
   }, [contractHistory, userDetails, selectedUnit]);
 
   const fetchContractEmployees = async (contractId) => {

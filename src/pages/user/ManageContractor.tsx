@@ -21,7 +21,7 @@ const ManageContractor = () => {
   const [loading, setLoading] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState('');
 
-  const allowedRoles = ['SuperAdmin', 'Contract Manager'];
+  const allowedRoles = ['SuperAdmin', 'Contract Manager', 'Contractual Employee Approver'];
   const isSuperAdmin = userDetails?.Roles?.includes('SuperAdmin');
   // const isContractManager = userDetails?.Roles?.includes('Contract Manager');
 
@@ -81,8 +81,6 @@ const ManageContractor = () => {
       setLoading(false);
     }
   };
-
-  console.log(contracts);
 
   const fetchExistingContractors = async () => {
     try {
@@ -168,8 +166,44 @@ const ManageContractor = () => {
   const filteredTableData = useMemo(() => {
     if (isSuperAdmin) return tableData;
 
-    return tableData.filter((row) => row.unitName === userDetails.Unit);
+    const userDepartments = new Set();
+
+    userDetails?.roleAssigned?.forEach((role) => {
+      if (!allowedRoles.includes(role.roleAssign)) return;
+
+      role.units?.forEach((u) => {
+        if (u.unitName === userDetails.Unit) {
+          u.departments?.forEach((d) => {
+            userDepartments.add(d.departmentName);
+          });
+        }
+      });
+    });
+
+    return tableData.filter((row) => {
+      if (row.unitName !== userDetails.Unit) return false;
+
+      return row.departments?.some((d) => userDepartments.has(d.departmentName));
+    });
   }, [tableData, userDetails]);
+
+  const userDepartments = useMemo(() => {
+    const set = new Set();
+
+    userDetails?.roleAssigned?.forEach((role) => {
+      if (!allowedRoles.includes(role.roleAssign)) return;
+
+      role.units?.forEach((u) => {
+        if (u.unitName === userDetails.Unit) {
+          u.departments?.forEach((d) => {
+            set.add(d.departmentName);
+          });
+        }
+      });
+    });
+
+    return set;
+  }, [userDetails]);
 
   const columns = [
     {
@@ -190,7 +224,15 @@ const ManageContractor = () => {
     {
       accessorKey: 'departments',
       header: 'Departments',
-      cell: ({ row }) => <div className="px-2 py-3 font-semibold">{row.original.departments?.map((d) => d.departmentName).join(', ') || '-'}</div>,
+      cell: ({ row }) => {
+        if (isSuperAdmin) {
+          return <div className="px-2 py-3 font-semibold">{row.original.departments?.map((d) => d.departmentName).join(', ') || '-'}</div>;
+        }
+
+        const filteredDepartments = row.original.departments?.filter((d) => userDepartments.has(d.departmentName));
+
+        return <div className="px-2 py-3 font-semibold">{filteredDepartments?.map((d) => d.departmentName).join(', ') || '-'}</div>;
+      },
     },
     {
       accessorKey: 'action',
@@ -251,7 +293,6 @@ const ManageContractor = () => {
       setLoading(false);
     }
   };
-
   return (
     <div className="p-4 md:p-8">
       {loading && <Loader />}
@@ -269,12 +310,16 @@ const ManageContractor = () => {
                 onClick={() => {
                   const userUnit = unitOptions.find((u) => u.label === userDetails.Unit) || unitOptions[0];
 
+                  const userDepartment = departmentOptions.find((d) => d.label === userDetails.Department) || departmentOptions[0];
+
                   setMode('add');
 
                   setSelectedRow({
                     contractor: '',
-                    unitId: userUnit?.value ?? null,
-                    departments: [],
+                    unitId: userUnit?.value ?? '',
+                    departments: userDepartment
+                      ? [{ departmentId: userDepartment.value }]
+                      : [],
                   });
 
                   setShowModal(true);
