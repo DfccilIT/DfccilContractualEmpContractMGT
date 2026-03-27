@@ -10,6 +10,8 @@ import fetchContractReportingAuthorityRequestsReducer from '@/features/employeeA
 import fetchEmployeeApprovalReducer from '@/features/employeeApproval/employeeApprovalSlice';
 import contractProfileChangeRequestReducer from '@/features/employeeApproval/contractProfilerequestsslice';
 import employeeReducer from '@/features/employee/employeeSlice';
+import allRoleReducer from '@/features/roleManagement/roleSlice';
+import empRoleListReducer from '@/features/allRole/empRoleListSlice';
 
 const persistConfig = {
   key: 'root',
@@ -20,7 +22,9 @@ const persistConfig = {
 const rootReducer = combineReducers({
   user: userReducer,
   applications: applicationsReducer,
-    employee: employeeReducer,
+  employee: employeeReducer,
+  roles: allRoleReducer,
+  empRoleList: empRoleListReducer,
 
   masterData: masterDataReducer,
   tokenData: tokenDataReduer,

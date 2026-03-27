@@ -365,11 +365,9 @@ const EmployeeApproval: React.FC = () => {
     return filterByDept(ReportingAuthorityRequests, (ele) => ele?.oldRecored?.department);
   }, [ReportingAuthorityRequests, shouldApplyDeptFilter, departmentList]);
 
-  // ⚠️ avoid double filtering if not needed
   const employeeApprovalRowsFiltered = useMemo(() => {
     return filterByDept(employeeApprovalRows, (ele) => ele?.deptDFCCIL);
   }, [employeeApprovalRows, shouldApplyDeptFilter, departmentList]);
-  // Loading flags per tab for refresh buttons
   const isLoadingMap: Record<TabKey, boolean> = {
     new: employeeApprovalLoading,
     accepted: employeeApprovalLoading,

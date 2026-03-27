@@ -1,4 +1,4 @@
-import { environment } from '@/config';
+import axiosInstance from '@/services/axiosInstance';
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 
 interface Employee {
@@ -19,40 +19,23 @@ interface Employee {
   totalReportingCount: number;
   title: string | null;
 }
-
-interface Unit {
-  unitName: string;
-  unitId: number;
-}
-
 interface EmployeeState {
   employees: Employee[];
-  units: Unit[];
-  departments: string[];
   error: string | null;
   loading: boolean;
 }
 
 const initialState: EmployeeState = {
   employees: [],
-  units: [],
-  departments: [],
   loading: false,
   error: null,
 };
 
-export const fetchEmployees = createAsyncThunk('employee/fetchEmployee', async (_, { rejectWithValue }) => {
+export const fetchEmployeesList = createAsyncThunk('employee/fetchEmployee', async (_, { rejectWithValue }) => {
   try {
-    const response = await fetch(`${environment.orgHierarchy}/Organization/GetOrganizationHierarchy`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch employees');
-    }
-    const data = await response.json();
-    if (data && !data.error) {
-      return data.data;
-    } else {
-      return rejectWithValue('Failed to fetch employees');
-    }
+    const response = await axiosInstance.get(`/ModuleManagement/GetEmployeeProfile/X`);
+    console.log(response.data);
+    return response?.data?.data?.employee;
   } catch (error: any) {
     return rejectWithValue(error.message || 'Error loading employees');
   }
@@ -66,43 +49,22 @@ const employeeSlice = createSlice({
   reducers: {
     setEmployeesData: (state, action: PayloadAction<Employee[]>) => {
       state.employees = action.payload;
-      const uniqueUnits = Array.from(
-        new Map(action.payload.map((emp) => [emp.unitId, { unitName: emp.unitName, unitId: emp.unitId }])).values()
-      );
-      state.units = uniqueUnits;
-
-      // Extract unique departments (excluding null values)
-      const uniqueDepartments = Array.from(
-        new Set(action.payload.map((emp) => emp.department).filter((dept): dept is string => dept !== null))
-      );
-      state.departments = uniqueDepartments;
     },
     clearEmployeesData: (state) => {
       state.employees = [];
-      state.units = [];
-      state.departments = [];
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchEmployees.pending, (state) => {
+      .addCase(fetchEmployeesList.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchEmployees.fulfilled, (state, action: PayloadAction<Employee[]>) => {
+      .addCase(fetchEmployeesList.fulfilled, (state, action: PayloadAction<Employee[]>) => {
         state.loading = false;
         state.employees = action.payload;
-        const uniqueUnits = Array.from(
-          new Map(action.payload.map((emp) => [emp.unitId, { unitName: emp.unitName, unitId: emp.unitId }])).values()
-        );
-        state.units = uniqueUnits;
-
-        const uniqueDepartments = Array.from(
-          new Set(action.payload.map((emp) => emp.department).filter((dept): dept is string => dept !== null))
-        );
-        state.departments = uniqueDepartments;
       })
-      .addCase(fetchEmployees.rejected, (state, action) => {
+      .addCase(fetchEmployeesList.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });
