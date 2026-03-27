@@ -18,6 +18,7 @@ import Loader from '@/components/ui/loader';
 import { useSelector } from 'react-redux';
 import { environment } from '@/config';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
+import toast from 'react-hot-toast';
 
 const Heading = ({ type, children }) => {
   const Component = `h${type}`;
@@ -131,40 +132,19 @@ const Delegate = () => {
           },
         ],
       });
-
-      // Call ManageEmployeeVisibility API after successful role assignment
-      try {
-        const token = localStorage.getItem('token');
-        await axios.post(
-          `${environment.orgHierarchy}/MobileVisibility/ManageEmployeeVisibility`,
-          {
-            empCode: Number(selectedEmployee[0]?.userCode) || 0,
-            applicationId: environment.applicationId,
-            isActive: true,
-          },
-          {
-            headers: {
-              accept: 'text/plain',
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-      } catch (visibilityError) {
-        console.error('Failed to manage employee visibility:', visibilityError);
-        // Continue with success flow even if visibility API fails
+      if (response.data.statusCode === 200) {
+        setAssignmentStatus({
+          type: 'success',
+          message: 'Role assigned successfully!',
+        });
+        dispatch(fetchEmpRoleList());
+        setTimeout(() => {
+          setSelectedEmployee([]);
+          setAssignmentStatus(null);
+        }, 2000);
+      } else {
+        toast.error('The selected employee is already exist with the same role');
       }
-      setAssignmentStatus({
-        type: 'success',
-        message: 'Role assigned successfully!',
-      });
-      dispatch(fetchEmpRoleList());
-
-      // Reset form after successful assignment
-      setTimeout(() => {
-        setSelectedEmployee([]);
-        setAssignmentStatus(null);
-      }, 2000);
     } catch (error) {
       setAssignmentStatus({
         type: 'error',
@@ -177,7 +157,6 @@ const Delegate = () => {
   const deleteRoleMapping = async (iD) => {
     try {
       const response = await axiosInstance.delete(`/User/DeleteEMPRoleAssignment?MappingId=${iD}`);
-      console.log(response.data);
       if (response.data.statusCode === 200) {
         dispatch(fetchEmpRoleList());
       }
@@ -236,7 +215,6 @@ const Delegate = () => {
         header: 'Action',
         accessorKey: 'action',
         cell: ({ row }) => {
-          console.log(row.original, 'lllll');
           return (
             <div className="">
               <ConfirmDialog
@@ -310,7 +288,7 @@ const Delegate = () => {
             <div className="w-full lg:w-auto">
               <Button
                 onClick={handleAssignRole}
-                disabled={!selectedEmployee || selectedEmployee.length === 0 || isSubmitting || !role}
+                disabled={!selectedEmployee || selectedEmployee?.length === 0 || isSubmitting || !role}
                 className="w-full lg:w-auto lg:px-8"
               >
                 {isSubmitting ? (
