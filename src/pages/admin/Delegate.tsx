@@ -10,13 +10,10 @@ import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { RootState } from '@/app/store';
 import EmployeeSelect from '@/components/employeeSelect/EmployeeSelect';
 import axiosInstance from '@/services/axiosInstance';
-import axios from 'axios';
 import { fetchEmpRoleList } from '@/features/allRole/empRoleListSlice';
-import { findEmployeeDetails } from '@/lib/helperFunction';
 import TableList from '@/components/ui/data-table';
 import Loader from '@/components/ui/loader';
 import { useSelector } from 'react-redux';
-import { environment } from '@/config';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
 import toast from 'react-hot-toast';
 
@@ -40,7 +37,7 @@ const Delegate = () => {
   const user = useAppSelector((state: RootState) => state.user);
   const { userList, loading } = useAppSelector((state: RootState) => state.empRoleList);
   const { unit: unitList } = useAppSelector((state: RootState) => state.masterData.data);
-  const { globelAssigndRolesAndUnits, Roles, departmentList, GGMDepartments } = useSelector((state: RootState) => state.user);
+  const { globelAssigndRolesAndUnits, Roles, GGMDepartments } = useSelector((state: RootState) => state.user);
   const { roles } = useAppSelector((state: RootState) => state.roles);
   const rolesList = useMemo(() => {
     return roles?.filter((ele) => ele?.description === 'Contractual Employee Approver' || ele?.description === 'Contract Manager');
@@ -83,33 +80,31 @@ const Delegate = () => {
     dispatch(fetchRoles());
     dispatch(fetchEmpRoleList());
   }, [dispatch, user.unitId]);
-  console.log(Roles);
-  console.log(employeeList, 'employeeList');
+
   const filteredEmployees = useMemo(() => {
     return employeeList?.filter((ele) => {
       const isSuperAdmin = Roles?.includes('SuperAdmin');
-
       if (isSuperAdmin) {
         return Number(ele?.unitId) === Number(assignmentUnit);
       }
       return GGMDepartments?.includes(ele?.department?.toLowerCase?.() || '') && Number(ele?.unitId) === Number(assignmentUnit);
     });
   }, [assignmentUnit, employeeList, Roles?.length]);
-  const allowedRoles = new Set(['Contractual Employee Approver', 'Contract Manager']);
+  const allowedRoles = new Set(['Contractual Employee Approver']);
   const filteredTableData = useMemo(() => {
     if (!Array.isArray(userList)) return [];
 
+    const isSuperAdmin = Roles?.includes('SuperAdmin');
+
     return userList.filter((user: any) => {
       const hasValidRole = user?.roles?.some((role: any) => allowedRoles.has(role?.roleName));
-
       if (!hasValidRole) return false;
-
-      // if "0" => no unit filter
-      if (tableFilterUnit === '0') return true;
-
-      return Number(user?.unit) === Number(tableFilterUnit);
+      const unitMatch = tableFilterUnit === '0' || Number(user?.unit) === Number(tableFilterUnit);
+      if (!unitMatch) return false;
+      if (isSuperAdmin) return true;
+      return GGMDepartments?.includes(user?.deptDFCCIL?.toLowerCase?.() || '');
     });
-  }, [userList, tableFilterUnit]);
+  }, [userList, tableFilterUnit, Roles, GGMDepartments]);
   useEffect(() => {
     setSelectedEmployee([]);
     setAssignmentStatus(null);
@@ -136,7 +131,7 @@ const Delegate = () => {
         empUnitId: assignmentUnit, // Use selected assignment unit
         userRoles: [
           {
-            roleId: role, // Static Role Id for ROLE --- Contractual Employee Approver
+            roleId: role,
             departments: selectedEmployee[0]?.unitId === 396 ? [selectedEmployee[0]?.department] : ['all'],
           },
         ],
