@@ -83,9 +83,18 @@ const Delegate = () => {
     dispatch(fetchRoles());
     dispatch(fetchEmpRoleList());
   }, [dispatch, user.unitId]);
+  console.log(Roles);
+  console.log(employeeList, 'employeeList');
   const filteredEmployees = useMemo(() => {
-    return employeeList.filter((ele) => GGMDepartments?.includes(ele?.department?.toLowerCase()) && Number(ele?.unitId) === Number(assignmentUnit));
-  }, [assignmentUnit, employeeList, userList]);
+    return employeeList?.filter((ele) => {
+      const isSuperAdmin = Roles?.includes('SuperAdmin');
+
+      if (isSuperAdmin) {
+        return Number(ele?.unitId) === Number(assignmentUnit);
+      }
+      return GGMDepartments?.includes(ele?.department?.toLowerCase?.() || '') && Number(ele?.unitId) === Number(assignmentUnit);
+    });
+  }, [assignmentUnit, employeeList, Roles?.length]);
   const allowedRoles = new Set(['Contractual Employee Approver', 'Contract Manager']);
   const filteredTableData = useMemo(() => {
     if (!Array.isArray(userList)) return [];

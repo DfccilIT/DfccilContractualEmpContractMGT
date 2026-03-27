@@ -103,11 +103,10 @@ interface UserSelectProps {
 
 const EmployeeSelect: React.FC<UserSelectProps> = ({ employees, value, onChange, label, isDisabled = false }) => {
   const formatField = (field?: string | null) => (field && field.trim() !== '' && field.trim().toLowerCase() !== 'na' ? field : null);
-  const { GGMDepartments } = useAppSelector((state: RootState) => state.user);
 
   const options =
     employees
-      ?.filter((emp) => emp?.empName && emp.empName?.trim() !== '' && GGMDepartments?.includes(emp?.department?.toLowerCase()))
+      ?.filter((emp) => emp?.empName && emp.empName?.trim() !== '')
       .map((emp) => {
         const designation = formatField(emp.designation);
         const department = formatField(emp.department);
