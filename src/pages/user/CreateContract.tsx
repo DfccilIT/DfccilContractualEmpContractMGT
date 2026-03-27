@@ -6,9 +6,12 @@ import axiosInstance from '@/services/axiosInstance';
 import { showCustomToast } from '@/components/common/showCustomToast';
 import Loader from '@/components/ui/loader';
 import { Button } from '@/components/ui/button';
-import { Pencil, Plus } from 'lucide-react';
+import { Download, Pencil, Plus } from 'lucide-react';
 import { CreateContractDialog } from '@/components/dialogs/CreateContractModal';
 import ExpandableTableList from '@/components/ui/expand-table';
+import * as XLSX from 'xlsx-js-style';
+import { saveAs } from 'file-saver';
+import { formatDate } from '@/lib/helperFunction';
 
 const CreateContract = () => {
   const userDetails = useAppSelector((state: RootState) => state.user);
@@ -242,6 +245,153 @@ const CreateContract = () => {
     }
   };
 
+  const handleDownloadExcel = async (row) => {
+    const contractId = row.pkContractId;
+
+    let employees = contractEmployees[contractId];
+
+    if (!employees) {
+      const res = await axiosInstance.get(`/ContractManagement/get-contract-employees-search?contractId=${contractId}`);
+      employees = res.data.data || [];
+    }
+
+    const ws = XLSX.utils.aoa_to_sheet([]);
+
+    XLSX.utils.sheet_add_aoa(ws, [['Contract Details']], { origin: 'A1' });
+
+    ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }];
+
+    XLSX.utils.sheet_add_aoa(
+      ws,
+      [
+        ['Contractor', row.contractor, 'Contract Number', row.contractNumber],
+        ['Unit', row.unit, 'Department', row.department],
+        ['Start Date', formatDate(row.startDate), 'End Date', formatDate(row.endDate)],
+      ],
+      { origin: 'A3' }
+    );
+
+    XLSX.utils.sheet_add_aoa(ws, [['List of Employees']], { origin: 'A7' });
+
+    ws['!merges'].push({ s: { r: 6, c: 0 }, e: { r: 6, c: 3 } });
+
+    XLSX.utils.sheet_add_aoa(ws, [['Employee Code', 'Name', 'Department', 'Mobile']], { origin: 'A9' });
+
+    XLSX.utils.sheet_add_aoa(
+      ws,
+      employees.map((emp) => [emp.employeeCode, emp.userName, emp.deptDFCCIL, emp.mobile]),
+      { origin: 'A10' }
+    );
+
+    ws['!cols'] = [{ wch: 20 }, { wch: 30 }, { wch: 25 }, { wch: 20 }];
+
+    const makeBold = (cell) => {
+      if (!ws[cell]) return;
+      ws[cell].s = {
+        font: { bold: true },
+      };
+    };
+
+    makeBold('A1');
+    makeBold('A7');
+    ['A3', 'C3', 'A4', 'C4', 'A5', 'C5'].forEach(makeBold);
+    ['A9', 'B9', 'C9', 'D9'].forEach(makeBold);
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Contract');
+
+    const buffer = XLSX.write(wb, {
+      bookType: 'xlsx',
+      type: 'array',
+    });
+
+    const file = new Blob([buffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+
+    saveAs(file, `${row.contractNumber}_Contract.xlsx`);
+  };
+
+  const handleDownloadAllContracts = async () => {
+    try {
+      setLoading(true);
+
+      const wb = XLSX.utils.book_new();
+
+      for (const row of filteredContracts) {
+        const contractId = row.pkContractId;
+
+        let employees = contractEmployees[contractId];
+
+        if (!employees) {
+          const res = await axiosInstance.get(`/ContractManagement/get-contract-employees-search?contractId=${contractId}`);
+          employees = res.data.data || [];
+        }
+
+        const ws = XLSX.utils.aoa_to_sheet([]);
+
+        XLSX.utils.sheet_add_aoa(ws, [['Contract Details']], { origin: 'A1' });
+
+        ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }];
+
+        XLSX.utils.sheet_add_aoa(
+          ws,
+          [
+            ['Contractor', row.contractor, 'Contract Number', row.contractNumber],
+            ['Unit', row.unit, 'Department', row.department],
+            ['Start Date', formatDate(row.startDate), 'End Date', formatDate(row.endDate)],
+          ],
+          { origin: 'A3' }
+        );
+
+        XLSX.utils.sheet_add_aoa(ws, [['List of Employees']], { origin: 'A7' });
+
+        ws['!merges'].push({ s: { r: 6, c: 0 }, e: { r: 6, c: 3 } });
+
+        XLSX.utils.sheet_add_aoa(ws, [['Employee Code', 'Name', 'Department', 'Mobile']], { origin: 'A9' });
+
+        XLSX.utils.sheet_add_aoa(
+          ws,
+          employees.map((emp) => [emp.employeeCode, emp.userName, emp.deptDFCCIL, emp.mobile]),
+          { origin: 'A10' }
+        );
+
+        ws['!cols'] = [{ wch: 20 }, { wch: 30 }, { wch: 25 }, { wch: 20 }];
+
+        const makeBold = (cell) => {
+          if (!ws[cell]) return;
+          ws[cell].s = {
+            font: { bold: true },
+          };
+        };
+
+        makeBold('A1');
+        makeBold('A7');
+        ['A3', 'C3', 'A4', 'C4', 'A5', 'C5'].forEach(makeBold);
+        ['A9', 'B9', 'C9', 'D9'].forEach(makeBold);
+
+        const sheetName = row.contractor;
+
+        XLSX.utils.book_append_sheet(wb, ws, sheetName);
+      }
+
+      const buffer = XLSX.write(wb, {
+        bookType: 'xlsx',
+        type: 'array',
+      });
+
+      const file = new Blob([buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+
+      saveAs(file, 'All_Contracts_Report.xlsx');
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const columns = [
     {
       accessorKey: 'key',
@@ -329,6 +479,10 @@ const CreateContract = () => {
             <Pencil className="w-4 h-4" />
           </Button>
 
+          <Button variant="outline" size="icon" onClick={() => handleDownloadExcel(row.original)} title="Generate Excel">
+            <Download className="w-4 h-4" />
+          </Button>
+
           {/* Delete Button */}
           {/* <ConfirmDialog
             triggerClassName="h-8 w-8 p-0 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100"
@@ -360,17 +514,27 @@ const CreateContract = () => {
         </div>
         <Card className="border-0 shadow-md">
           <CardContent className="mt-5">
-            <Button
-              onClick={() => {
-                setMode('add');
-                setSelectedRow(null);
-                setShowModal(true);
-              }}
-              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-            >
-              <Plus className="w-4 h-4" />
-              Add Contract
-            </Button>
+            <div className="flex justify-between mb-3">
+              <Button
+                onClick={() => {
+                  setMode('add');
+                  setSelectedRow(null);
+                  setShowModal(true);
+                }}
+                className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+              >
+                <Plus className="w-4 h-4" />
+                Add Contract
+              </Button>
+
+              <Button
+                onClick={handleDownloadAllContracts}
+                className="ml-3 flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all"
+              >
+                <Download className="w-4 h-4" />
+                All Contracts Report
+              </Button>
+            </div>
             <ExpandableTableList
               columns={columns}
               data={filteredContracts}
