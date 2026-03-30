@@ -6,7 +6,7 @@ const DFCCIL_UAT = {
   authUrl: 'https://app2.dfccil.com',
   clientId: '11c5d7b6f43c4127a997ad1096b41926',
   postLogout: 'https://uatlogin.dfccil.com/signout',
-  redirectPath: 'manage-contractor',
+  redirectPath: 'manage-contract',
   applicationId: 79,
 };
 
@@ -18,7 +18,7 @@ const DFCCIL_PROD = {
   authUrl: 'https://auth.dfccil.com',
   clientId: '61304a607f6947b285618a5775b65674',
   postLogout: 'https://dashboard.dfccil.com/signout',
-  redirectPath: 'manage-contractor',
+  redirectPath: 'manage-contract',
   applicationId: 75,
 };
 

@@ -52,8 +52,10 @@ const AppRoutes = () => {
           <Route element={<PrivateRoute allowedRoles={['user']} />}>
             <Route path="/" element={<HomePage />} />
           </Route>
-          <Route element={<PrivateRoute allowedRoles={['SuperAdmin', 'Contract Manager', 'Contractual Employee Approver']} />}>
+          <Route element={<PrivateRoute allowedRoles={['SuperAdmin']} />}>
             <Route path="/manage-contractor" element={<ManageContractor />} />
+          </Route>
+          <Route element={<PrivateRoute allowedRoles={['SuperAdmin', 'Contract Manager', 'Contractual Employee Approver']} />}>
             <Route path="/manage-contract" element={<CreateContract />} />
             <Route path="/contractual" element={<EmployeeApproval />} />
             <Route path="/archived-contract" element={<ContractHistory />} />

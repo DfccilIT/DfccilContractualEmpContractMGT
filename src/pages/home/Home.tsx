@@ -13,7 +13,7 @@ const Home = () => {
       return;
     }
     if (Roles.includes('Contractual Employee Approver') || Roles?.includes('SuperAdmin')) {
-      navigate('/manage-contractor', { replace: true });
+      navigate('/manage-contract', { replace: true });
       return;
     }
   }, [Roles, navigate]);
