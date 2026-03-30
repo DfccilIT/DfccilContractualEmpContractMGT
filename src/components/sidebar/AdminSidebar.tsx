@@ -50,7 +50,7 @@ export function AdminSidebar(props: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuButton
-            onClick={() => navigate('/manage-contractor')}
+            onClick={() => navigate('/manage-contract')}
             asChild
             tooltip={' Manage Personal View'}
             className={`transition-all text-black cursor-pointer duration-300  active:bg-primary [&>svg]:size-7 ease-in-out hover:bg-primary hover:text-white h-full w-full active:text-white`}

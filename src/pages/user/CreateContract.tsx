@@ -317,7 +317,7 @@ const CreateContract = () => {
       setLoading(true);
 
       const wb = XLSX.utils.book_new();
-
+      console.log(filteredContracts);
       for (const row of filteredContracts) {
         const contractId = row.pkContractId;
 
@@ -370,7 +370,7 @@ const CreateContract = () => {
         ['A3', 'C3', 'A4', 'C4', 'A5', 'C5'].forEach(makeBold);
         ['A9', 'B9', 'C9', 'D9'].forEach(makeBold);
 
-        const sheetName = row.contractor;
+        const sheetName = `${row.contractor}_${row.contractNumber}`.replace(/[:\\/?*\[\]]/g, '').substring(0, 31);
 
         XLSX.utils.book_append_sheet(wb, ws, sheetName);
       }

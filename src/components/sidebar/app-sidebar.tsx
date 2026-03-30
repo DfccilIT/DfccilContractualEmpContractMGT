@@ -34,7 +34,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
       title: 'Manage Contractors',
       url: '/manage-contractor',
       icon: SquareUserRound,
-      roles: ['SuperAdmin', 'Contract Manager', 'Contractual Employee Approver'],
+      roles: ['SuperAdmin'],
     },
     {
       title: 'Manage Contracts',
