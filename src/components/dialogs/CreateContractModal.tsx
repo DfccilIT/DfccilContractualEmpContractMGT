@@ -133,9 +133,9 @@ export const CreateContractDialog = ({
       newErrors.endDate = 'End date cannot be before start date';
     }
 
-    if (selectedEmployees.length === 0) {
-      newErrors.employees = 'Please select at least one employee';
-    }
+    // if (selectedEmployees.length === 0) {
+    //   newErrors.employees = 'Please select at least one employee';
+    // }
 
     setErrors(newErrors);
 
