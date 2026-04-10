@@ -49,7 +49,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
       roles: ['SuperAdmin', 'Contract Manager', 'Contractual Employee Approver'],
     },
     {
-      title: 'Contractual',
+      title: 'Contractual Requests',
       url: '/contractual',
       icon: User2,
       roles: ['SuperAdmin', 'HR', 'Contract Manager', 'Contractual Employee Approver'],
