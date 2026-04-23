@@ -328,30 +328,31 @@ const EmployeeApprovalInfoDialog: React.FC<Props> = ({
                             className="mt-1"
                           />
                         </div>
-
-                        <Button size="sm" className="h-9 mt-[22px]" onClick={() => setOpenCreateContract(true)}>
-                          + Add
-                        </Button>
                       </div>
-                      <div>
-                        <Label>Select Contractor Number</Label>
-                        <Select
-                          value={selectedContractorNumber}
-                          isClearable
-                          onChange={(e) => {
-                            setSelectedContractorNumber(e);
-                          }}
-                          options={contractNumberOptions}
-                          placeholder="Select contractor number"
-                          className="mt-1"
-                          styles={{
-                            menuList: (provided) => ({
-                              ...provided,
-                              maxHeight: '210px',
-                              overflowY: 'auto',
-                            }),
-                          }}
-                        />
+                      <div className="flex gap-2 items-end">
+                        <div className="flex-1">
+                          <Label>Select Contractor Number</Label>
+                          <Select
+                            value={selectedContractorNumber}
+                            isClearable
+                            onChange={(e) => {
+                              setSelectedContractorNumber(e);
+                            }}
+                            options={contractNumberOptions}
+                            placeholder="Select contractor number"
+                            className="mt-1"
+                            styles={{
+                              menuList: (provided) => ({
+                                ...provided,
+                                maxHeight: '210px',
+                                overflowY: 'auto',
+                              }),
+                            }}
+                          />
+                        </div>
+                        <Button size="sm" title='Create a new Contract / Work Order' className="h-9 mt-[22px] text-2xl" onClick={() => setOpenCreateContract(true)}>
+                          +
+                        </Button>
                       </div>
                     </div>
                   )}
