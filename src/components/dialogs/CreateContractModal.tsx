@@ -7,19 +7,11 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import axiosInstance from '@/services/axiosInstance';
 import { useAppSelector } from '@/app/hooks';
 import { RootState } from '@/app/store';
+import { useContractors } from '@/hooks/useContractors';
+import { useAvailableEmployees } from '@/hooks/useAvailableEmployees';
+import Loader from '../ui/loader';
 
-export const CreateContractDialog = ({
-  open,
-  onOpenChange,
-  mode = 'add',
-  units,
-  initialData,
-  Contractors,
-  Departments,
-  employees,
-  onSave,
-  assignedEmployees,
-}) => {
+export const CreateContractDialog = ({ open, onOpenChange, mode = 'add', units, initialData, onSave, assignedEmployees }) => {
   const [formData, setFormData] = useState({
     unit: null,
     contractor: null,
@@ -38,6 +30,9 @@ export const CreateContractDialog = ({
   const [employeeSearch, setEmployeeSearch] = useState('');
   const userDetails = useAppSelector((state: RootState) => state.user);
   const allowedRoles = ['SuperAdmin', 'Contract Manager', 'Contractual Employee Approver'];
+  const { contractors: Contractors, loading: contractorLoading } = useContractors();
+  const { employeeOptions: employees, loading: employeesLoading } = useAvailableEmployees();
+
 
   useEffect(() => {
     if (!open) return;
@@ -80,7 +75,6 @@ export const CreateContractDialog = ({
 
   useEffect(() => {
     if (!open) return;
-
     if (initialData) {
       const selectedUnit = units?.find((u) => u.label === initialData.unit);
 
@@ -297,11 +291,16 @@ export const CreateContractDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()} className="max-w-6xl w-[95vw] flex flex-col">
+      <DialogContent
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
+        className="max-w-6xl w-[95vw] flex flex-col max-h-[90vh] overflow-y-auto"
+      >
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">{isEdit ? 'Update Contract' : 'Add Contract'}</DialogTitle>
         </DialogHeader>
         <div className="max-h-[90vh] overflow-y-auto">
+          {(loading || contractorLoading || employeesLoading) && <Loader />}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-4">
             {/* Unit */}
             {units.length > 1 && (
@@ -313,7 +312,7 @@ export const CreateContractDialog = ({
                 <Select
                   value={formData.unit}
                   onChange={(val) => {
-                    setFormData((prev) => ({ ...prev, unit: val }));
+                    setFormData((prev) => ({ ...prev, unit: val, contractor: null }));
                     clearError('unit');
                   }}
                   options={units}
@@ -590,7 +589,7 @@ export const CreateContractDialog = ({
           </div>
         </div>
         <DialogFooter>
-          <div className="pt-6 flex justify-end">
+          <div className="pt-0 flex justify-end">
             <ConfirmDialog
               triggerClassName="font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
               description={isEdit ? 'Are you sure you want to update this contract?' : 'Are you sure you want to add this contract?'}

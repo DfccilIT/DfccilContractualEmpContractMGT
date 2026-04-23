@@ -380,7 +380,7 @@ const EmployeeApproval: React.FC = () => {
   return (
     <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row justify-between">
-        <Heading type={2}>Contractual Employee Approval</Heading>
+        <Heading type={2}>Contractual Employee Approval Requests</Heading>
         <div className="min-w-[200px]">
           <Label>Select Unit</Label>
           <Select value={selectedUnit} onChange={setSelectedUnit} options={unitOptions} />

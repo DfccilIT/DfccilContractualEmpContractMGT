@@ -16,12 +16,10 @@ import { formatDate } from '@/lib/helperFunction';
 const CreateContract = () => {
   const userDetails = useAppSelector((state: RootState) => state.user);
   const [loading, setLoading] = useState(false);
-  const [contractors, setContractors] = useState([]);
   const [contracts, setContracts] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [mode, setMode] = useState<'add' | 'edit'>('add');
   const [selectedRow, setSelectedRow] = React.useState(null);
-  const [employeeOptions, setEmployeeOptions] = useState([]);
   const [contractEmployees, setContractEmployees] = useState({});
   const [employeeSearch, setEmployeeSearch] = useState({});
   const [selectedUnit, setSelectedUnit] = useState('');
@@ -74,34 +72,15 @@ const CreateContract = () => {
     return Array.from(map.values());
   }, [userDetails]);
 
-  const fetchContractorsData = async () => {
-    try {
-      setLoading(true);
-      const response = await axiosInstance.get('/ContractManagement/get-contractors');
-      setContractors(response.data.data);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const handleSubmit = async (formData) => {
+  const handleSubmit = async (payload) => {
     try {
       setLoading(true);
-      const payload = {
-        contractUnitMappingId: formData.contractUnitMappingId,
-        contractNumber: formData.contractNumber,
-        startDate: formData.startDate,
-        endDate: formData.endDate,
-        numberOfEmployees: formData.numberOfEmployees,
-        employeeMasterIds: formData.employeeMasterIds,
-      };
 
       let response;
 
       if (mode === 'edit') {
-        response = await axiosInstance.put(`/ContractManagement/update-contract/${selectedRow.pkContractId}`, payload);
+        response = await axiosInstance.put(`/ContractManagement/update-contract/${selectedRow?.pkContractId}`, payload);
       } else {
         response = await axiosInstance.post('/ContractManagement/create-contract', payload);
       }
@@ -112,11 +91,8 @@ const CreateContract = () => {
           type: 'success',
           message: mode === 'edit' ? 'Contract updated successfully' : 'Contract added successfully',
         });
-        fetchEmployees();
         setShowModal(false);
         setSelectedRow(null);
-
-        fetchContractorsData();
         fetchContract();
         if (mode === 'edit' && selectedRow?.pkContractId) {
           fetchContractEmployees(selectedRow.pkContractId);
@@ -146,46 +122,10 @@ const CreateContract = () => {
     }
   };
 
-  const fetchEmployees = async () => {
-    try {
-      setLoading(true);
-
-      const res = await axiosInstance.get('/ContractManagement/employees-available');
-
-      const isSuperAdmin = userDetails?.Roles?.includes('SuperAdmin');
-
-      let employees = res.data.data;
-
-      if (!isSuperAdmin) {
-        employees = employees.filter((emp) => emp.location === userDetails.Unit);
-      }
-
-      const formatted = employees.map((emp) => ({
-        value: emp.employeeId,
-        label: emp.userName,
-        empCode: emp.employeeCode,
-        department: emp.deptDFCCIL,
-      }));
-
-      setEmployeeOptions(formatted);
-    } catch (err) {
-      console.log(err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
-    fetchContractorsData();
     fetchContract();
-    fetchEmployees();
   }, []);
-
-  useEffect(() => {
-    if (showModal) {
-      fetchEmployees();
-    }
-  }, [showModal]);
 
   const filteredContracts = useMemo(() => {
     let data = contracts;
@@ -634,9 +574,6 @@ const CreateContract = () => {
         mode={mode}
         initialData={selectedRow}
         units={unitOptions}
-        Contractors={contractors}
-        Departments={departmentOptions}
-        employees={employeeOptions}
         assignedEmployees={assignedEmployees}
         onSave={handleSubmit}
       />

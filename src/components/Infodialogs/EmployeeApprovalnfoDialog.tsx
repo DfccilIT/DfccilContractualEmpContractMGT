@@ -17,6 +17,8 @@ import toast from 'react-hot-toast';
 import { useActiveContracts } from '@/hooks/useActiveContracts';
 import { formatDate } from '@/lib/helperFunction';
 import { Label } from '../ui/label';
+import { CreateContractDialog } from '../dialogs/CreateContractModal';
+import Loader from '../ui/loader';
 type Props = {
   isOpen: boolean;
   selectedUnit: any;
@@ -37,6 +39,7 @@ const EmployeeApprovalInfoDialog: React.FC<Props> = ({
   selectedUnit,
 }) => {
   const [isAcceptAlertOpen, setIsAcceptAlertOpen] = useState(false);
+  const [openCreateContract, setOpenCreateContract] = useState(false);
   const [isRejectOpen, setIsRejectOpen] = useState(false);
   const [isDeactivateOpen, setIsDeactivateOpen] = useState(false);
   const [remarks, setRemarks] = useState('');
@@ -44,12 +47,16 @@ const EmployeeApprovalInfoDialog: React.FC<Props> = ({
   const [selectedContractorId, setSelectedContractorId] = useState(null);
   const [selectedContractorNumber, setSelectedContractorNumber] = useState(null);
   const [imageError, setImageError] = useState(false);
-  const { globelAssigndRolesAndUnits, Roles, departmentId } = useAppSelector((state: RootState) => state.user);
   const dispatch = useAppDispatch();
   const handleAcceptClick = () => setIsAcceptAlertOpen(true);
   const handleRejectClick = () => setIsRejectOpen(true);
   const handleDeactivateClick = () => setIsDeactivateOpen(true);
-  const { data: activeContract, loading ,refetch} = useActiveContracts();
+  const { data: activeContract, refetch } = useActiveContracts();
+
+  const userDetails = useAppSelector((state: RootState) => state.user);
+  const [loading, setLoading] = useState(false);
+  const allowedRoles = ['SuperAdmin', 'Contract Manager', 'Contractual Employee Approver'];
+
   const fetchContracts = async () => {
     try {
       const res = await axiosInstance.get('/ModuleManagement/GetAllContractMaster');
@@ -59,9 +66,44 @@ const EmployeeApprovalInfoDialog: React.FC<Props> = ({
     } finally {
     }
   };
+
+  const unitOptions = useMemo(() => {
+    const map = new Map();
+
+    userDetails?.roleAssigned
+      ?.filter((role) => allowedRoles.includes(role.roleAssign))
+      ?.forEach((role) => {
+        role.units?.forEach((u) => {
+          map.set(u.mstUnitId, {
+            value: u.mstUnitId,
+            label: u.unitName,
+          });
+        });
+      });
+
+    return Array.from(map.values());
+  }, [userDetails]);
+
   useEffect(() => {
     fetchContracts();
   }, []);
+
+  const handleAddContract = async (payload) => {
+    setLoading(true);
+    try {
+      const response = await axiosInstance.post('/ContractManagement/create-contract', payload);
+      if (response.data.statusCode === 200) {
+        toast.success('Contract Added Successfully');
+        refetch();
+        setOpenCreateContract(false);
+      }
+    } catch (err) {
+      toast.error('Failed to create contract');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleProceedEmployeeApprovalAccept = async () => {
     if (!selectedContractorId || !selectedContractorNumber) {
       toast.error('Please select contractor');
@@ -80,7 +122,7 @@ const EmployeeApprovalInfoDialog: React.FC<Props> = ({
         await dispatch(fetchEmployeeApprovalRequests(Number(selectedUnit.value))).unwrap();
         setIsAcceptAlertOpen(false);
         onClose();
-        refetch()
+        refetch();
         setSelectedContractorId(null);
         setSelectedContractorNumber(null);
       }
@@ -216,6 +258,7 @@ const EmployeeApprovalInfoDialog: React.FC<Props> = ({
 
           {selectedRequest && (
             <div className="p-4 mb-6">
+              {loading && <Loader />}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
                 <aside className="lg:col-span-4 ">
                   <figure className="w-full">
@@ -267,29 +310,28 @@ const EmployeeApprovalInfoDialog: React.FC<Props> = ({
                   </div>
                   {activeTab === 'new' && (
                     <div className="grid grid-cols-1 gap-2">
-                      <div>
-                        <Label>Select Contractor</Label>
-                        <Select
-                          value={selectedContractorId}
-                          isClearable
-                          onChange={(e) => {
-                            setSelectedContractorId(e);
-                            setSelectedContractorNumber(null);
-                          }}
-                          options={activeContract.map((ele) => ({
-                            label: ele?.contractorName,
-                            value: ele?.contractorId,
-                          }))}
-                          placeholder="Select contractor"
-                          className="mt-1"
-                          styles={{
-                            menuList: (provided) => ({
-                              ...provided,
-                              maxHeight: '210px',
-                              overflowY: 'auto',
-                            }),
-                          }}
-                        />
+                      <div className="flex gap-2 items-end">
+                        <div className="flex-1">
+                          <Label>Select Contractor</Label>
+                          <Select
+                            value={selectedContractorId}
+                            isClearable
+                            onChange={(e) => {
+                              setSelectedContractorId(e);
+                              setSelectedContractorNumber(null);
+                            }}
+                            options={activeContract.map((ele) => ({
+                              label: ele?.contractorName,
+                              value: ele?.contractorId,
+                            }))}
+                            placeholder="Select contractor"
+                            className="mt-1"
+                          />
+                        </div>
+
+                        <Button size="sm" className="h-9 mt-[22px]" onClick={() => setOpenCreateContract(true)}>
+                          + Add
+                        </Button>
                       </div>
                       <div>
                         <Label>Select Contractor Number</Label>
@@ -400,6 +442,15 @@ const EmployeeApprovalInfoDialog: React.FC<Props> = ({
         onOpenChange={setIsDeactivateOpen}
         HandleProceedDeactivate={handleProceedEmployeeDeactivate}
         employeeName={selectedRequest?.userName}
+      />
+      <CreateContractDialog
+        open={openCreateContract}
+        onOpenChange={setOpenCreateContract}
+        mode={'add'}
+        initialData={null}
+        units={unitOptions}
+        assignedEmployees={null}
+        onSave={handleAddContract}
       />
     </div>
   );
