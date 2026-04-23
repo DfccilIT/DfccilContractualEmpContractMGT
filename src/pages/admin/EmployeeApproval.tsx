@@ -77,7 +77,6 @@ const EmployeeApproval: React.FC = () => {
   );
   const employee = useAppSelector((s: RootState) => s.employee.employees);
   const dispatch = useAppDispatch();
-  console.log(departmentList, 'departmentList');
   const unitOptions = useMemo(() => {
     if (unitList.length === 0) return [];
 

@@ -226,7 +226,6 @@ const EmployeeApprovalInfoDialog: React.FC<Props> = ({
         })) || []
     );
   }, [activeContract, selectedContractorId]);
-  console.log(contractNumberOptions, 'contractNumberOptions');
   return (
     <div>
       <Dialog

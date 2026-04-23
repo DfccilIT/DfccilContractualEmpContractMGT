@@ -35,7 +35,6 @@ const DependentRequestInfoDialog: React.FC<Props> = ({ isOpen, onClose, selected
   const [searchParams] = useSearchParams();
   const subTabFromUrl = searchParams.get('status') || 'pending';
   const dispatch = useAppDispatch();
-console.log(selectedRequest,"selectedRequest")
   const handleAcceptClick = () => setIsAcceptAlertOpenDependentList(true);
   const handleRejectClick = () => setIsRejectOpenDependentList(true);
 

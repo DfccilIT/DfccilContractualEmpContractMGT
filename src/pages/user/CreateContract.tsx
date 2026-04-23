@@ -257,7 +257,6 @@ const CreateContract = () => {
       setLoading(true);
 
       const wb = XLSX.utils.book_new();
-      console.log(filteredContracts);
       for (const row of filteredContracts) {
         const contractId = row.pkContractId;
 

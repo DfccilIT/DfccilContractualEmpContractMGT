@@ -13,7 +13,6 @@ import RejectDialog from '../alertboxes/RejectDialog';
 import { Button } from '../ui/button';
 
 const ReportingAuthorityRequestsInfoDialog = ({ isOpen, onClose, selectedRequest, employee }) => {
-  console.log('Selected Reporting Authority Request:', selectedRequest);
   const [isAcceptAlertOpenReportingOfficer, setIsAcceptAlertOpenReportingOfficer] = useState(false);
   const [isRejectOpenReportingOfficer, setIsRejectOpenReportingOfficer] = useState(false);
   const dispatch = useAppDispatch();
