@@ -33,7 +33,6 @@ export const CreateContractDialog = ({ open, onOpenChange, mode = 'add', units, 
   const { contractors: Contractors, loading: contractorLoading } = useContractors();
   const { employeeOptions: employees, loading: employeesLoading } = useAvailableEmployees();
 
-
   useEffect(() => {
     if (!open) return;
 
@@ -301,7 +300,7 @@ export const CreateContractDialog = ({ open, onOpenChange, mode = 'add', units, 
         </DialogHeader>
         <div className="max-h-[90vh] overflow-y-auto">
           {(loading || contractorLoading || employeesLoading) && <Loader />}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+          <div className={`grid grid-cols-1 sm:grid-cols-2 ${units.length > 1 ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-4 mt-4`}>
             {/* Unit */}
             {units.length > 1 && (
               <div className="space-y-2">
