@@ -452,6 +452,7 @@ const EmployeeApprovalInfoDialog: React.FC<Props> = ({
         units={unitOptions}
         assignedEmployees={null}
         onSave={handleAddContract}
+        showEmployees={false}
       />
     </div>
   );

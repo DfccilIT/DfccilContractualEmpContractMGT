@@ -72,7 +72,6 @@ const CreateContract = () => {
     return Array.from(map.values());
   }, [userDetails]);
 
-
   const handleSubmit = async (payload) => {
     try {
       setLoading(true);
@@ -121,7 +120,6 @@ const CreateContract = () => {
       setLoading(false);
     }
   };
-
 
   useEffect(() => {
     fetchContract();
@@ -576,6 +574,7 @@ const CreateContract = () => {
         units={unitOptions}
         assignedEmployees={assignedEmployees}
         onSave={handleSubmit}
+        showEmployees={true}
       />
     </div>
   );

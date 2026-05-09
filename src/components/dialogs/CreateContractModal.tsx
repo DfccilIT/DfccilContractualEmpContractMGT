@@ -11,7 +11,7 @@ import { useContractors } from '@/hooks/useContractors';
 import { useAvailableEmployees } from '@/hooks/useAvailableEmployees';
 import Loader from '../ui/loader';
 
-export const CreateContractDialog = ({ open, onOpenChange, mode = 'add', units, initialData, onSave, assignedEmployees }) => {
+export const CreateContractDialog = ({ open, onOpenChange, mode = 'add', units, initialData, onSave, assignedEmployees, showEmployees = true }) => {
   const [formData, setFormData] = useState({
     unit: null,
     contractor: null,
@@ -474,7 +474,8 @@ export const CreateContractDialog = ({ open, onOpenChange, mode = 'add', units, 
               </Label>
 
               <input
-                type="number"
+                type="text"
+                inputMode='numeric'
                 value={formData.noOfEmployees}
                 onChange={(e) => {
                   setFormData((prev) => ({
@@ -495,97 +496,99 @@ export const CreateContractDialog = ({ open, onOpenChange, mode = 'add', units, 
               )}
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-6 mt-4">
-            {/* Available Employees */}
-            <div className="border rounded-lg p-4">
-              <div className="flex justify-between">
-                <h3 className="font-semibold text-gray-700 mb-3">Available Employees ({filteredEmployees.length})</h3>
-
-                <input
-                  type="text"
-                  placeholder="Search employee..."
-                  value={employeeSearch}
-                  onChange={(e) => setEmployeeSearch(e.target.value)}
-                  className="w-1/2 mb-3 border rounded-md px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div className="max-h-52 overflow-y-auto space-y-2">
-                {filteredEmployees.map((emp) => (
-                  <div
-                    key={emp.value}
-                    onClick={() => {
-                      // if (!formData.noOfEmployees) return;
-                      addEmployee(emp);
-                    }}
-                    //                 className={`flex justify-between items-center border rounded-md px-3 py-2
-                    // ${!formData.noOfEmployees ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-gray-50'}`}
-                    className="flex justify-between items-center border rounded-md px-3 py-2 cursor-pointer hover:bg-gray-50"
-                  >
-                    <div className="flex gap-1">
-                      <p className="text-sm font-medium">{emp.empCode} |</p>
-                      <p className="text-sm font-medium">{emp.label.toUpperCase()} |</p>
-                      <p className="text-sm font-medium">{emp.department.toUpperCase()}</p>
-                    </div>
-
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        addEmployee(emp);
-                      }}
-                      // disabled={!formData.noOfEmployees}
-                      // className={`text-xs font-medium ${!formData.noOfEmployees ? 'text-gray-400 cursor-not-allowed' : 'text-blue-600 hover:text-blue-800'}`}
-                      className="text-xs font-medium text-blue-600 hover:text-blue-800"
-                    >
-                      Add
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-            {/* Selected Employees */}
-            <div>
+          {showEmployees && (
+            <div className="grid grid-cols-2 gap-6 mt-4">
+              {/* Available Employees */}
               <div className="border rounded-lg p-4">
-                <h3 className="font-semibold text-gray-700 mb-3">
-                  {isEdit ? 'Assigned Employees' : 'Selected Employees'} ({selectedEmployees.length})
-                </h3>
+                <div className="flex justify-between">
+                  <h3 className="font-semibold text-gray-700 mb-3">Available Employees ({filteredEmployees.length})</h3>
+
+                  <input
+                    type="text"
+                    placeholder="Search employee..."
+                    value={employeeSearch}
+                    onChange={(e) => setEmployeeSearch(e.target.value)}
+                    className="w-1/2 mb-3 border rounded-md px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
 
                 <div className="max-h-52 overflow-y-auto space-y-2">
-                  {selectedEmployees.length === 0 && <p className="text-sm text-gray-400">No employees selected</p>}
-
-                  {selectedEmployees.map((emp) => (
+                  {filteredEmployees.map((emp) => (
                     <div
                       key={emp.value}
-                      onClick={() => removeEmployee(emp)}
-                      className="flex justify-between items-center border rounded-md px-3 py-2 bg-blue-50 cursor-pointer hover:bg-blue-100 transition-colors"
+                      onClick={() => {
+                        // if (!formData.noOfEmployees) return;
+                        addEmployee(emp);
+                      }}
+                      //                 className={`flex justify-between items-center border rounded-md px-3 py-2
+                      // ${!formData.noOfEmployees ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-gray-50'}`}
+                      className="flex justify-between items-center border rounded-md px-3 py-2 cursor-pointer hover:bg-gray-50"
                     >
-                      <div className="flex gap-2">
+                      <div className="flex gap-1">
                         <p className="text-sm font-medium">{emp.empCode} |</p>
-                        <p className="text-sm font-medium">{emp.label} |</p>
-                        <p className="text-sm font-medium">{emp.department}</p>
+                        <p className="text-sm font-medium">{emp.label.toUpperCase()} |</p>
+                        <p className="text-sm font-medium">{emp.department.toUpperCase()}</p>
                       </div>
 
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          removeEmployee(emp);
+                          addEmployee(emp);
                         }}
-                        className="text-red-500 text-xs font-medium hover:text-red-700"
+                        // disabled={!formData.noOfEmployees}
+                        // className={`text-xs font-medium ${!formData.noOfEmployees ? 'text-gray-400 cursor-not-allowed' : 'text-blue-600 hover:text-blue-800'}`}
+                        className="text-xs font-medium text-blue-600 hover:text-blue-800"
                       >
-                        Remove
+                        Add
                       </button>
                     </div>
                   ))}
                 </div>
               </div>
-              {errors.employees && (
-                <p className="text-xs text-red-500 flex items-center gap-1 mt-2">
-                  <AlertCircle className="h-3 w-3" />
-                  {errors.employees}
-                </p>
-              )}
+              {/* Selected Employees */}
+              <div>
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold text-gray-700 mb-3">
+                    {isEdit ? 'Assigned Employees' : 'Selected Employees'} ({selectedEmployees.length})
+                  </h3>
+
+                  <div className="max-h-52 overflow-y-auto space-y-2">
+                    {selectedEmployees.length === 0 && <p className="text-sm text-gray-400">No employees selected</p>}
+
+                    {selectedEmployees.map((emp) => (
+                      <div
+                        key={emp.value}
+                        onClick={() => removeEmployee(emp)}
+                        className="flex justify-between items-center border rounded-md px-3 py-2 bg-blue-50 cursor-pointer hover:bg-blue-100 transition-colors"
+                      >
+                        <div className="flex gap-2">
+                          <p className="text-sm font-medium">{emp.empCode} |</p>
+                          <p className="text-sm font-medium">{emp.label} |</p>
+                          <p className="text-sm font-medium">{emp.department}</p>
+                        </div>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeEmployee(emp);
+                          }}
+                          className="text-red-500 text-xs font-medium hover:text-red-700"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {errors.employees && (
+                  <p className="text-xs text-red-500 flex items-center gap-1 mt-2">
+                    <AlertCircle className="h-3 w-3" />
+                    {errors.employees}
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
         <DialogFooter>
           <div className="pt-0 flex justify-end">
