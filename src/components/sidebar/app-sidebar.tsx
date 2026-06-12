@@ -31,6 +31,12 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const canAccessAdminDashboard = true;
   const allNavItems: NavItem[] = [
     {
+      title: 'Role Assignment',
+      icon: UserCog,
+      url: '/employee-delegate',
+      roles: ['CGM', 'SuperAdmin', 'GGM', 'GM'],
+    },
+    {
       title: 'Manage Contractors',
       url: '/manage-contractor',
       icon: SquareUserRound,
@@ -43,22 +49,16 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
       roles: ['SuperAdmin', 'Contract Manager', 'Contractual Employee Approver', 'CGM', 'GGM'],
     },
     {
-      title: 'Archived Contracts',
-      url: '/archived-contract',
-      icon: History,
-      roles: ['SuperAdmin', 'Contract Manager', 'Contractual Employee Approver', 'CGM', 'GGM'],
-    },
-    {
       title: 'Contractual Requests',
       url: '/contractual',
       icon: User2,
       roles: ['SuperAdmin', 'HR', 'Contract Manager', 'Contractual Employee Approver', 'CGM', 'GGM'],
     },
     {
-      title: 'Role Assignment',
-      icon: UserCog,
-      url: '/employee-delegate',
-      roles: ['CGM', 'SuperAdmin', 'GGM', 'GM'],
+      title: 'Archived Contracts',
+      url: '/archived-contract',
+      icon: History,
+      roles: ['SuperAdmin', 'Contract Manager', 'Contractual Employee Approver', 'CGM', 'GGM'],
     },
   ];
   const navMainItems = allNavItems.filter((item) => item.roles.some((role) => Roles.includes(role)));
