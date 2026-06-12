@@ -21,7 +21,7 @@ const ManageContractor = () => {
   const [loading, setLoading] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState('');
 
-  const allowedRoles = ['SuperAdmin', 'Contract Manager', 'Contractual Employee Approver'];
+  const allowedRoles = ['SuperAdmin', 'Contract Manager', 'Contractual Employee Approver', 'CGM', 'GGM'];
   const isSuperAdmin = userDetails?.Roles?.includes('SuperAdmin');
   // const isContractManager = userDetails?.Roles?.includes('Contract Manager');
 
@@ -317,9 +317,7 @@ const ManageContractor = () => {
                   setSelectedRow({
                     contractor: '',
                     unitId: userUnit?.value ?? '',
-                    departments: userDepartment
-                      ? [{ departmentId: userDepartment.value }]
-                      : [],
+                    departments: userDepartment ? [{ departmentId: userDepartment.value }] : [],
                   });
 
                   setShowModal(true);

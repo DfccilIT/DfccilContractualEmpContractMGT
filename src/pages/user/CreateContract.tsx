@@ -24,7 +24,7 @@ const CreateContract = () => {
   const [employeeSearch, setEmployeeSearch] = useState({});
   const [selectedUnit, setSelectedUnit] = useState('');
 
-  const allowedRoles = ['SuperAdmin', 'Contract Manager', 'Contractual Employee Approver'];
+  const allowedRoles = ['SuperAdmin', 'Contract Manager', 'Contractual Employee Approver', 'CGM', 'GGM'];
   const isSuperAdmin = userDetails?.Roles?.includes('SuperAdmin');
 
   const unitOptions = useMemo(() => {

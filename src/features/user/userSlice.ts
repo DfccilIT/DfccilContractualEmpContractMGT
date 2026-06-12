@@ -146,7 +146,7 @@ const userSlice = createSlice({
         const roles = data?.dmsRoles?.map((r: any) => r.roleAssign) || [];
         state.Roles = [...new Set([...roles, 'user'])];
         state.roleAssigned = data?.dmsRoles || [];
-        const approvalDepartments = data?.dmsRoles?.find((ele) => ele?.roleAssign === 'Contractual Employee Approver');
+        const approvalDepartments = data?.dmsRoles?.find((ele) => ['Contractual Employee Approver', 'CGM', 'GGM'].includes(ele?.roleAssign));
         const GGMDepartments = data?.dmsRoles?.find((ele) => ele?.roleAssign === 'GGM' || ele.roleAssign === 'CGM');
         state.departmentList = approvalDepartments?.units[0]?.departments?.map((ele) => ele?.departmentName?.toLowerCase());
         state.GGMDepartments = GGMDepartments?.units[0]?.departments?.map((ele) => ele?.departmentName?.toLowerCase());

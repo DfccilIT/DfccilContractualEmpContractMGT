@@ -71,7 +71,7 @@ const EmployeeApproval: React.FC = () => {
   // --- Store ---
   const { data: employeeApprovalData, loading: employeeApprovalLoading } = useAppSelector((state: RootState) => state.fetchEmployeeApproval);
   const { data: ProfileChangeRequests, loading: ProfileChangeRequestsLoading } = useAppSelector((state: RootState) => state.contractProfileChangeRequest);
-
+console.log(departmentList,"departmentList")
   const { data: ReportingAuthorityRequests, loading: ReportingAuthorityRequestsLoading } = useAppSelector(
     (state: RootState) => state.fetchContractReportingAuthorityRequests
   );
@@ -350,7 +350,7 @@ const EmployeeApproval: React.FC = () => {
   // make data optional + default to []
   const filterByDept = <T,>(data: T[] | undefined, getDept: (item: T) => string | undefined): T[] => {
     if (!shouldApplyDeptFilter) return data ?? [];
-
+console.log()
     return (data ?? []).filter((item) => departmentList?.includes(getDept(item)?.toLowerCase() || ''));
   };
   const employeeApprovalRows = useMemo(() => {
@@ -366,6 +366,7 @@ const EmployeeApproval: React.FC = () => {
   }, [ReportingAuthorityRequests, shouldApplyDeptFilter, departmentList]);
 
   const employeeApprovalRowsFiltered = useMemo(() => {
+    console.log(employeeApprovalRows,"employeeApprovalRows")
     return filterByDept(employeeApprovalRows, (ele) => ele?.deptDFCCIL);
   }, [employeeApprovalRows, shouldApplyDeptFilter, departmentList]);
   const isLoadingMap: Record<TabKey, boolean> = {

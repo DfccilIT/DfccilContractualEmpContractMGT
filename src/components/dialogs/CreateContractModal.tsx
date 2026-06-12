@@ -29,7 +29,7 @@ export const CreateContractDialog = ({ open, onOpenChange, mode = 'add', units, 
   const [limitErrorMsg, setLimitErrorMsg] = useState('');
   const [employeeSearch, setEmployeeSearch] = useState('');
   const userDetails = useAppSelector((state: RootState) => state.user);
-  const allowedRoles = ['SuperAdmin', 'Contract Manager', 'Contractual Employee Approver'];
+  const allowedRoles = ['SuperAdmin', 'Contract Manager', 'Contractual Employee Approver', 'CGM', 'GGM'];
   const { contractors: Contractors, loading: contractorLoading } = useContractors();
   const { employeeOptions: employees, loading: employeesLoading } = useAvailableEmployees();
 
@@ -475,7 +475,7 @@ export const CreateContractDialog = ({ open, onOpenChange, mode = 'add', units, 
 
               <input
                 type="text"
-                inputMode='numeric'
+                inputMode="numeric"
                 value={formData.noOfEmployees}
                 onChange={(e) => {
                   setFormData((prev) => ({

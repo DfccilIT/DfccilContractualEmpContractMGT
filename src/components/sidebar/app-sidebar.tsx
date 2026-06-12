@@ -40,19 +40,19 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
       title: 'Manage Contracts',
       url: '/manage-contract',
       icon: SquarePen,
-      roles: ['SuperAdmin', 'Contract Manager', 'Contractual Employee Approver'],
+      roles: ['SuperAdmin', 'Contract Manager', 'Contractual Employee Approver', 'CGM', 'GGM'],
     },
     {
       title: 'Archived Contracts',
       url: '/archived-contract',
       icon: History,
-      roles: ['SuperAdmin', 'Contract Manager', 'Contractual Employee Approver'],
+      roles: ['SuperAdmin', 'Contract Manager', 'Contractual Employee Approver', 'CGM', 'GGM'],
     },
     {
       title: 'Contractual Requests',
       url: '/contractual',
       icon: User2,
-      roles: ['SuperAdmin', 'HR', 'Contract Manager', 'Contractual Employee Approver'],
+      roles: ['SuperAdmin', 'HR', 'Contract Manager', 'Contractual Employee Approver', 'CGM', 'GGM'],
     },
     {
       title: 'Role Assignment',

@@ -326,29 +326,29 @@ const Delegate = () => {
             {/* {loading ? (
               <Loader />
             ) : ( */}
-              <div>
-                <div className="flex items-center">
-                  <div className="w-full mb-4">
-                    <Label className="text-sm font-medium mb-2 block">Filter by Unit</Label>
-                    <Select value={tableFilterUnit} onValueChange={setTableFilterUnit}>
-                      <SelectTrigger className="w-full max-w-xs">
-                        <SelectValue placeholder="Select Unit" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {unitOptions.map((unit) => (
-                          <SelectItem key={unit.value} value={unit.value.toString()}>
-                            {unit.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button onClick={() => dispatch(fetchEmpRoleList())}>
-                    <RefreshCcw />
-                  </Button>
+            <div>
+              <div className="flex items-center">
+                <div className="w-full mb-4">
+                  <Label className="text-sm font-medium mb-2 block">Filter by Unit</Label>
+                  <Select value={tableFilterUnit} onValueChange={setTableFilterUnit}>
+                    <SelectTrigger className="w-full max-w-xs">
+                      <SelectValue placeholder="Select Unit" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {unitOptions.map((unit) => (
+                        <SelectItem key={unit.value} value={unit.value.toString()}>
+                          {unit.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-                <TableList columns={columns} data={filteredTableData} />
+                <Button onClick={() => dispatch(fetchEmpRoleList())}>
+                  <RefreshCcw />
+                </Button>
               </div>
+              <TableList columns={columns} data={filteredTableData} />
+            </div>
             {/* )} */}
           </div>
         </div>
